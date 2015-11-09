@@ -1,0 +1,63 @@
+fmod ARBIN is
+	pr NAT .
+	sort Arbin .
+
+	op error : -> [Nat] .
+	op errorN : -> [Arbin] .
+
+	op arbinVacio : -> Arbin [ctor] .
+	op arbinPadre : Arbin Nat Nat Arbin -> Arbin [ctor] .
+
+	op arbinInserta : Nat Nat Arbin -> Arbin [ctor] .
+	ceq arbinInserta(c, val, raiz) = arbinPadre( arbinVacio, c, val, arbinVacio) 
+	  if( raiz == arbinVacio ) .
+	ceq arbinInserta(c, val, raiz) = arbinPadre(getIz(raiz), getclave(raiz), getvalor(raiz), arbinInserta(c, val, getDr(raiz)))  
+          if ( getclave(raiz) < c) . 	
+	ceq arbinInserta(c, val, raiz) = arbinPadre(arbinInserta(c, val, getIz(raiz)), getclave(raiz), getvalor(raiz), getDr(raiz))  
+          if ( getclave(raiz) > c) . 	
+	ceq arbinInserta(c, val, raiz) = arbinPadre(getIz(raiz), getclave(raiz), mezcla(getvalor(raiz) , val), getDr(raiz))  
+          if ( getclave(raiz) == c) .
+	
+	op mezcla :  Nat Nat -> Nat .
+	eq mezcla(c, val) = c + val .	
+	
+	op buscarclave :  Nat Arbin -> Nat .
+	ceq buscarclave(c, raiz) =  error 
+	  if(raiz == arbinVacio) .
+	ceq buscarclave(c, raiz) = getvalor(raiz)
+	  if( getclave(raiz) == c) .
+	ceq buscarclave(c, raiz) = buscarclave(c, getIz(raiz))
+	  if( getclave(raiz) > c) .
+	ceq buscarclave(c, raiz) = buscarclave(c, getDr(raiz))
+	  if( getclave(raiz) < c) .
+
+	op getclave : Arbin -> Nat .
+	eq getclave(arbinPadre(i, c, val, d)) = c .
+	eq getclave(arbinVacio) = error .
+	
+	op getvalor : Arbin -> Nat .
+	eq getvalor(arbinPadre(i, c, val, d)) = val .
+	eq getvalor(arbinVacio) = error .
+
+	op getIz : Arbin -> Arbin .
+	eq getIz(arbinPadre(i, c, val, d)) = i .
+	eq getIz(arbinVacio) = errorN .
+
+	op getDr : Arbin -> Arbin .
+	eq getDr(arbinPadre(i, c, val, d)) = d .
+	eq getDr(arbinVacio) = errorN .
+	
+
+	var c : Nat .
+	var val : Nat .
+	var i : Arbin .
+	var d : Arbin .	
+	var raiz : Arbin .		
+endfm
+
+red arbinInserta(4, 4, arbinPadre(arbinVacio, 3, 4, arbinVacio)) .
+red arbinInserta(4, 4, arbinInserta(4, 4, arbinPadre(arbinVacio, 3, 4, arbinVacio))) .
+red arbinInserta(2, 10, arbinInserta(4, 4, arbinInserta(4, 4, arbinPadre(arbinVacio, 3, 4, arbinVacio)))) .
+red buscarclave(2, arbinInserta(2, 10, arbinInserta(4, 4, arbinInserta(4, 4, arbinPadre(arbinVacio, 3, 4, arbinVacio))))) .
+red buscarclave(4, arbinInserta(2, 10, arbinInserta(4, 4, arbinInserta(4, 4, arbinPadre(arbinVacio, 3, 4, arbinVacio))))) .
+red buscarclave(5, arbinInserta(2, 10, arbinInserta(4, 4, arbinInserta(4, 4, arbinPadre(arbinVacio, 3, 4, arbinVacio))))) .

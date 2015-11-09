@@ -1,0 +1,57 @@
+(:	Grupo 3
+	Hristo Ivanov Ivanov
+	Alberto Lorente Sánchez:)
+
+(:1Mostrar toda la informacion de todos los libros. Pista: Figura 2.:)
+
+xquery version "3.0";
+
+for $e in doc("/db/sgdi/books.xml")/catalog/book
+return $e
+
+(:2. Mostrar toda la informacion de los libros de fantasia.:)
+
+xquery version "3.0";
+
+for $e in doc("/db/sgdi/books.xml")/catalog/book
+where $e/genre = "Fantasy"
+return $e
+
+(:3. Mostrar el titulo de los libros de informatica (genero \Computer").:)
+
+xquery version "3.0";
+
+for $e in doc("/db/sgdi/books.xml")/catalog/book
+where $e/genre = "Computer"
+return $e/title
+
+(:4. Mostrar toda la informacion de los libros que cuestan menos de 10e, ordenados
+por nombre de autor descendente.:)
+
+xquery version "3.0";
+
+for $e in doc("/db/sgdi/books.xml")/catalog/book
+where $e/price < 10.0
+order by $e/author
+return $e
+
+(:5. Mostrar toda la informacion del libro con identicador \bk105".:)
+
+xquery version "3.0";
+
+for $e in doc("/db/sgdi/books.xml")/catalog/book
+where $e/@id= "bk105"
+return $e
+
+(:6. Encontrar el libro con identicador \bk105" y devolver un solo nodo
+\elem" con atributo \precio" y dos hijos: titulo y autor. Ejemplo::)
+
+xquery version "3.0";
+
+for $e in doc("/db/sgdi/books.xml")/catalog/book
+let $a := $e/price/string()
+where $e/@id= "bk105"
+return <elem price="{$a}">
+            {$e/title}
+            {$e/author}
+        </elem>

@@ -1,0 +1,254 @@
+fmod LISTA_STR is
+ pr STRING .
+
+ sorts Lista .
+ subsort String < Lista .
+
+ op lv : -> Lista [ctor] .
+ op __ : Lista Lista -> Lista [ctor assoc id: lv] .
+
+ vars P P' : String .
+ vars L L' : Lista .
+
+ op head : Lista ~> String .
+ eq head(P L) = P .
+
+ op tail : Lista ~> Lista .
+ eq tail(P L) = L .
+
+ op tam : Lista -> Nat .
+ eq tam(lv) = 0 .
+ eq tam(P L) = s(tam(L)) .
+
+ op esta? : Lista String -> Bool .
+ eq esta?(L P L', P) = true .
+ eq esta?(L, P) = false [owise] .
+endfm
+
+
+
+
+
+
+
+
+
+
+
+fmod ABB is
+ pr STRING .
+ pr LISTA_STR .
+
+ sort Par .
+
+ op <_,_> : Nat Nat -> Par [ctor] .
+
+ sort ABB .
+
+ op vacio : -> ABB [ctor] .
+ op _[_,_]_ : ABB String Par ABB -> ABB [ctor] .
+
+ vars C C' V V' : Nat .
+ vars P P' : Par .
+ vars S S' : String .
+ vars A A' HI HD : ABB .
+
+ op primero : Par -> Nat .
+ eq primero(< C, V >) = C .
+
+ op segundo : Par -> Nat .
+ eq segundo(< C, V >) = V .
+
+ *** La primera pareja es la que tenemos y la segunda la que queremos introducir.
+ *** Sumamos la cantidad y actualizamos el precio.
+ op insertarNuevo : Par Par -> Par .
+ eq insertarNuevo(< C, V >, < C', V' >) = < C + C', V' > .
+
+ op quitar : Par Nat ~> Par .
+ ceq quitar(< C, V >, C') = < sd(C, C'), V >
+  if C >= C' .
+
+ op insertar : ABB String Par -> ABB .
+ eq insertar(vacio, S, P) = vacio [S, P] vacio .
+ ceq insertar(HI [S, P] HD, S', P') = HI [S, insertarNuevo(P, P')] HD
+  if S == S' .
+ ceq insertar(HI [S, P] HD, S', P') = HI [S, P] insertar(HD, S', P')
+  if S < S' .
+ ceq insertar(HI [S, P] HD, S', P') = insertar(HI, S', P') [S, P] HD
+  if S > S' .
+
+ op cantidad : ABB String -> Nat .
+ eq cantidad(vacio, S) = 0 .
+ ceq cantidad(HI [S, P] HD, S') = primero(P)
+  if S == S' .
+ ceq cantidad(HI [S, P] HD, S') = cantidad(HD, S')
+  if S < S' .
+ ceq cantidad(HI [S, P] HD, S') = cantidad(HI, S')
+  if S > S' .
+
+ op precio : ABB String ~> Nat .
+ ceq precio(HI [S, P] HD, S') = segundo(P)
+  if S == S' .
+ ceq precio(HI [S, P] HD, S') = precio(HD, S')
+  if S < S' .
+ ceq precio(HI [S, P] HD, S') = precio(HI, S')
+  if S > S' .
+
+ op vender : ABB String Nat -> ABB .
+ eq vender(vacio, S, C) = vacio .
+ ceq vender(HI [S, P] HD, S', C) = HI [S, quitar(P, C)] HD
+  if S == S' .
+ ceq vender(HI [S, P] HD, S', C) = HI [S, P] vender(HD, S', C)
+  if S < S' .
+ ceq vender(HI [S, P] HD, S', C) = vender(HI, S', C) [S, P] HD
+  if S > S' .
+
+ *** NUESTRO
+ op inorden : ABB -> Lista [ctor] .
+ eq inorden(vacio) =  lv .
+ eq inorden(HI [S , P] HD) = inorden(HI) S inorden(HD) .
+
+ op nuestroABB : String Nat Nat -> ABB .
+ eq nuestroABB(S, C ,V) = vacio [S , < C , V >] vacio .
+
+ op nuestroABBB : String Nat Nat -> ABB .
+ eq nuestroABBB(S, C, V) = nuestroABB(S + "_izq", C ,V) [ S , < s(C) , s(V) > ] nuestroABB(S + "_dr", s(s(C)), s(s(V))) .
+ 
+ op ourH : -> ABB .
+ eq ourH =  vacio ["h" , <  7, 2 >] vacio .
+
+ op ourE : -> ABB .
+ eq ourE =  vacio ["e" , < 4 , 2 >] vacio .
+
+ op ourC : -> ABB .
+ eq ourC =  vacio ["c" , < 9 , 2 >] vacio .
+
+ op ourA : -> ABB .
+ eq ourA =  vacio ["a" , < 0 , 2 >] vacio .
+
+ op ourD : -> ABB .
+ eq ourD =  ourC ["d" , < 3 , 2 >] ourE .
+
+ op ourI : -> ABB .
+ eq ourI =  ourH ["i" , < 8 , 2 >] vacio .
+
+ op ourB : -> ABB .
+ eq ourB =  ourA ["b" , < 9 , 2 >] ourD .
+
+ op ourG : -> ABB .
+ eq ourG =  vacio ["g" , < 6 , 2 >] ourI .
+
+ op ourF : -> ABB .
+ eq ourF =  ourB ["f" , < 5 , 2 >] ourG .
+ *** NUESTRO
+
+endfm
+
+fmod GENTE is
+ pr STRING .
+
+ sorts Gente Comprador Representante .
+ subsort Comprador Representante < Gente .
+
+ op nadie : -> Gente [ctor] .
+ op __ : Gente Gente -> Gente [ctor assoc comm id: nadie] .
+
+ op comprador : String Nat -> Comprador [ctor] .
+ op representante : String Nat Nat -> Representante [ctor] .
+endfm
+
+mod TIENDA is
+ pr GENTE .
+ pr ABB .
+
+ sort Tienda .
+
+ *** Catalogo de peliculas, de libros y dinero en caja.
+ op [_|_,_,_] : Gente ABB ABB Nat -> Tienda [ctor] .
+
+ var  G : Gente .
+ var  S : String .
+ vars N D D' V : Nat .
+ vars P P' L L' : ABB .
+
+ ***(
+ crl [venta-peli] :
+     [ comprador(S, N) G | P, L, D ]
+  => [ G | vender(P, S, N), L, D + (precio(P, S) * N) ]
+  if cantidad(P, S) >= N .
+  )
+
+  crl [venta-peli] :
+     [ comprador(S, N) G | P, L, D ] =>
+     [ comprador(S, sd(N,1)) G | vender(P, S, 1), L, D + (precio(P, S))]
+  if N =/= 0 and cantidad(P, S) > 0 .
+
+
+  crl [venta-peli] :
+     [ comprador(S, N) G | P, L, D ] =>
+     [ G | P, L, D]
+  if N == 0 .
+
+ ***(
+ *** Usando condiciones de encaje de patrones.
+ crl [venta-peli] :
+     [ comprador(S, N) G | P, L, D ]
+  => [ G | P', L, D' ]
+  if cantidad(P, S) >= N /\
+     P' := vender(P, S, N) /\
+     D' := D + (precio(P, S) * N) .
+ )
+
+ crl [venta-libro] :
+     [ comprador(S, N) G | P, L, D ]
+  => [ G | P, vender(L, S, N), D + (precio(L, S) * N) ]
+  if cantidad(L, S) >= N .
+
+ ***(
+ *** Usando condiciones de encaje de patrones.
+ crl [venta-libro] :
+     [ comprador(S, N) G | P, L, D ]
+  => [ G | P, L', D' ]
+  if cantidad(P, S) >= N /\
+     L' := vender(L, S, N) /\
+     D' := D + (precio(L, S) * N) .
+ )
+
+ crl [nuevas-pelis] :
+     [ representante(S, N, V) G | P, L, D ]
+  => [ G | insertar(P, S, < N, V * 2 >), L, sd(D, N * V) ]
+  if N * V <= D .
+
+ crl [nuevos-libros] :
+     [ representante(S, N, V) G | P, L, D ]
+  => [ G | P, insertar(L, S, < N, V * 2 >), sd(D, N * V) ]
+  if N * V <= D .
+endm
+
+mod EJEMPLO is
+ pr TIENDA .
+
+ ops c1 c2 c3 : -> Comprador .
+ eq c1 = comprador("a", 2) .
+ eq c2 = comprador("b", 2) .
+ eq c3 = comprador("c", 2) .
+
+ ops r1 r2 r3 : -> Representante .
+ eq r1 = representante("a", 1, 10) .
+ eq r2 = representante("b", 2, 20) .
+ eq r3 = representante("c", 3, 30) .
+
+ op tienda : -> Tienda .
+ eq tienda = [ c1 c2 c3 | ourF, vacio, 100] .
+ ***eq tienda = [ c1 c2 c3 r1 r2 r3 | ourF, vacio, 100] .
+endm
+
+red inorden(ourF) .
+
+rew tienda .
+
+***frew tienda .
+
+***search tienda =>* [ G:Gente | P:ABB, L:ABB, D:Nat] s.t. D:Nat > 100 .
+
+***show path 7 .
