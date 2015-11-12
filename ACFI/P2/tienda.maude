@@ -26,15 +26,6 @@ fmod LISTA_STR is
 endfm
 
 
-
-
-
-
-
-
-
-
-
 fmod ABB is
  pr STRING .
  pr LISTA_STR .
@@ -199,10 +190,23 @@ mod TIENDA is
      D' := D + (precio(P, S) * N) .
  )
 
+ ***(
  crl [venta-libro] :
      [ comprador(S, N) G | P, L, D ]
   => [ G | P, vender(L, S, N), D + (precio(L, S) * N) ]
   if cantidad(L, S) >= N .
+ )
+
+  crl [venta-libro] :
+     [ comprador(S, N) G | P, L, D ] =>
+     [ comprador(S, sd(N,1)) G | P, vender(L, S, 1), D + (precio(L, S))]
+  if N =/= 0 and cantidad(L, S) > 0 .
+
+
+  crl [venta-libro] :
+     [ comprador(S, N) G | P, L, D ] =>
+     [ G | P, L, D]
+  if N == 0 .
 
  ***(
  *** Usando condiciones de encaje de patrones.
@@ -239,7 +243,7 @@ mod EJEMPLO is
  eq r3 = representante("c", 3, 30) .
 
  op tienda : -> Tienda .
- eq tienda = [ c1 c2 c3 | ourF, vacio, 100] .
+ eq tienda = [ c1 c2 c3 | vacio, ourF, 100] .
  ***eq tienda = [ c1 c2 c3 r1 r2 r3 | ourF, vacio, 100] .
 endm
 
