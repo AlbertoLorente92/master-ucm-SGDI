@@ -1,3 +1,7 @@
+// Grupo 3
+// Alberto Lorente
+// Hristo Ivanov
+
 /**
  * Adaptación del ejemplo original en http://wiki.apache.org/hadoop/WordCount
  */
