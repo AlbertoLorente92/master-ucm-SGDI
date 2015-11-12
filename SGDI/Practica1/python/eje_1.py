@@ -1,3 +1,7 @@
+# Grupo 3
+# Alberto Lorente
+# Hristo Ivanov
+
 from mrjob.job import MRJob
 
 
