@@ -144,8 +144,8 @@ fmod GENTE is
  op nadie : -> Gente [ctor] .
  op __ : Gente Gente -> Gente [ctor assoc comm id: nadie] .
 
- op comprador : String Nat -> Comprador [ctor] .
- op representante : String Nat Nat -> Representante [ctor] .
+ op comprador : String String Nat -> Comprador [ctor] .
+ op representante : String String Nat Nat -> Representante [ctor] .
 endfm
 
 mod TIENDA is
@@ -158,27 +158,28 @@ mod TIENDA is
  op [_|_,_,_] : Gente ABB ABB Nat -> Tienda [ctor] .
 
  var  G : Gente .
- var  S : String .
+ var  S Q : String .
  vars N D D' V : Nat .
  vars P P' L L' : ABB .
 
- ***(
- crl [venta-peli] :
-     [ comprador(S, N) G | P, L, D ]
-  => [ G | vender(P, S, N), L, D + (precio(P, S) * N) ]
-  if cantidad(P, S) >= N .
-  )
+ 
 
+  *** Apartado 4
   crl [venta-peli] :
-     [ comprador(S, N) G | P, L, D ] =>
-     [ comprador(S, sd(N,1)) G | vender(P, S, 1), L, D + (precio(P, S))]
-  if N =/= 0 and cantidad(P, S) > 0 .
+     [ comprador(Q, S, N) G | P, L, D ] =>
+     [ comprador(Q, S, sd(N,1)) G | vender(P, S, 1), L, D + (precio(P, S))]
+  if N =/= 0 and cantidad(P, S) > 0 and Q == "pelis" .
 
-
-  crl [venta-peli] :
-     [ comprador(S, N) G | P, L, D ] =>
+  crl [venta-peli-libro] :
+     [ comprador(Q, S, N) G | P, L, D ] =>
      [ G | P, L, D]
   if N == 0 .
+
+  crl [venta-libro] :
+     [ comprador(Q, S, N) G | P, L, D ] =>
+     [ comprador(Q, S, sd(N,1)) G | P, vender(L, S, 1), D + (precio(L, S))]
+  if N =/= 0 and cantidad(L, S) > 0 and Q == "libros" .
+
 
  ***(
  *** Usando condiciones de encaje de patrones.
@@ -191,24 +192,6 @@ mod TIENDA is
  )
 
  ***(
- crl [venta-libro] :
-     [ comprador(S, N) G | P, L, D ]
-  => [ G | P, vender(L, S, N), D + (precio(L, S) * N) ]
-  if cantidad(L, S) >= N .
- )
-
-  crl [venta-libro] :
-     [ comprador(S, N) G | P, L, D ] =>
-     [ comprador(S, sd(N,1)) G | P, vender(L, S, 1), D + (precio(L, S))]
-  if N =/= 0 and cantidad(L, S) > 0 .
-
-
-  crl [venta-libro] :
-     [ comprador(S, N) G | P, L, D ] =>
-     [ G | P, L, D]
-  if N == 0 .
-
- ***(
  *** Usando condiciones de encaje de patrones.
  crl [venta-libro] :
      [ comprador(S, N) G | P, L, D ]
@@ -217,48 +200,21 @@ mod TIENDA is
      L' := vender(L, S, N) /\
      D' := D + (precio(L, S) * N) .
  )
- ***(
- crl [nuevas-pelis] :
-     [ representante(S, N, V) G | P, L, D ]
-  => [ G | insertar(P, S, < N, V * 2 >), L, sd(D, N * V) ]
-  if N * V <= D .
-  
-
- crl [nuevos-libros] :
-     [ representante(S, N, V) G | P, L, D ]
-  => [ G | P, insertar(L, S, < N, V * 2 >), sd(D, N * V) ]
-  if N * V <= D .
- )
-
+ 
+ *** Apartado 5.
  crl [nuevas-pelis] : 
-     [ representante(S, N, V) G | P, L, D ]
-  => [ representante(S, sd(N,1), V) G | insertar(P, S, < 1, V * 2 >), L, sd(D, V) ]
-  if V <= D and N =/= 0 .
+     [ representante(Q, S, N, V) G | P, L, D ]
+  => [ representante(Q, S, sd(N,1), V) G | insertar(P, S, < 1, V * 2 >), L, sd(D, V) ]
+  if V <= D and N =/= 0 and Q == "pelis" .
 
- crl [nuevas-pelis] : [ representante(S, N, V) G | P, L, D ]
+ crl [nuevas-pelis-libros] : [ representante(Q, S, N, V) G | P, L, D ]
   => [ G | P, L, D ]
   if N == 0 .
 
  crl [nuevos-libros] : 
-     [ representante(S, N, V) G | P, L, D ]
-  => [ representante(S, sd(N,1), V) G | P, insertar(L, S, < 1, V * 2 >), sd(D, V) ]
-  if V <= D and N =/= 0 .
-
- crl [nuevos-libros] : [ representante(S, N, V) G | P, L, D ]
-  => [ G | P, L, D ]
-  if N == 0 .
-
- ***(
-  crl [venta-peli] :
-     [ comprador(S, N) G | P, L, D ] =>
-     [ comprador(S, sd(N,1)) G | vender(P, S, 1), L, D + (precio(P, S))]
-  if N =/= 0 and cantidad(P, S) > 0 .
-
-  crl [venta-peli] :
-     [ comprador(S, N) G | P, L, D ] =>
-     [ G | P, L, D]
-  if N == 0 .
- )
+     [ representante(Q, S, N, V) G | P, L, D ]
+  => [ representante(Q, S, sd(N,1), V) G | P, insertar(L, S, < 1, V * 2 >), sd(D, V) ]
+  if V <= D and N =/= 0 and Q == "libros" .
 
 endm
 
@@ -266,18 +222,18 @@ mod EJEMPLO is
  pr TIENDA .
 
  ops c1 c2 c3 : -> Comprador .
- eq c1 = comprador("a", 2) .
- eq c2 = comprador("b", 2) .
- eq c3 = comprador("c", 2) .
+ eq c1 = comprador("pelis", "a", 2) .
+ eq c2 = comprador("pelis", "b", 2) .
+ eq c3 = comprador("pelis", "c", 2) .
 
  ops r1 r2 r3 : -> Representante .
- eq r1 = representante("a", 1, 10) .
- eq r2 = representante("b", 2, 20) .
- eq r3 = representante("c", 3, 30) .
+ eq r1 = representante("pelis", "a", 1, 10) .
+ eq r2 = representante("pelis", "b", 2, 20) .
+ eq r3 = representante("pelis", "c", 3, 30) .
 
  op tienda : -> Tienda .
- eq tienda = [ r1 r2 r3 | vacio, vacio, 10000] .
- ***eq tienda = [ c1 c2 c3 r1 r2 r3 | ourF, vacio, 100] .
+ ***eq tienda = [ r1 r2 r3 | vacio, vacio, 10000] .
+ eq tienda = [ c1 c2 c3 r1 r2 r3 | vacio, vacio, 100] .
 endm
 
 red inorden(ourF) .
