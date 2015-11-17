@@ -1,0 +1,203 @@
+fmod PROCESS is
+  pr STRING .
+
+  *** Processes are composed by a name and a priority.
+  sort Process .
+  op <_,_> : String Nat -> Process [ctor] .
+
+  vars N N' : Nat .
+  vars S S' : String .
+  vars P P' : Process .
+
+  *** "min", "max", "_<_", and "_<=_" over processes are defined by using
+  *** their priority.
+  ops min max : Process Process -> ########## [assoc] .
+  ops _<_ _<=_ : Process Process -> Bool .
+
+  eq min(< S, N >, < S', N' >) = ############################## .
+
+  eq max(< S, N >, < S', N' >) = ############################## .
+  eq < S, N > < < S', N' > = N < N' .
+  eq < S, N > <= < S', N' > = N <= N' .
+endfm
+
+*** Binary trees.
+fmod BTREE is
+ pr PROCESS .
+
+ *** The sorts for binary trees ("BTree") and nonempty
+ *** binary trees ("NeBTree")
+ sorts BTree NeBTree .
+ *** A nonempty binary tree is also a binary tree.
+ subsort ############################## .
+
+  *** The (constant) constructor of an "empty" tree.
+  op empty : -> BTree [ctor] .
+  *** The constructor for bigger trees.
+  op _[_]_ : BTree Process BTree -> NeBTree [ctor] .
+
+  vars BT BT' : BTree .
+  vars E E' : Process .
+
+  *** The function "complete" checks whether the tree is complete.
+  op complete : BTree -> Bool .
+  eq [cmp1] : complete(empty) = true .
+  eq [cmp2] : complete(BT [E] BT') = complete(BT) and complete(BT') and
+                                     depth(BT) == depth(BT') .
+
+  *** The function "depth" returns the depth of the tree.
+  op depth : BTree -> ############## .
+  eq [dp1] : depth(empty) = ############################## .
+  eq [dp2] : depth(BT [E] BT') = ############################## .
+
+  *** The function "empty" checks whether the binary tree is empty.
+  op empty : BTree -> ############ .
+  eq [mt?1] : empty(empty) = ############################## .
+  eq [mt?2] : empty(BT [E] BT') = ############################## .
+
+  *** The function "in?" checks whether the element is in the tree.
+  op in? : BTree Process -> Bool .
+  eq [in?1] : in?(empty, E) = ############################## .
+  eq [in?2] : in?(BT [E] BT', E') = ############################## .
+
+  *** The function "root" returns the root of a nonempty tree.
+  op root : NeBTree -> Process .
+  eq [root] : root(BT [E] BT') = ############################## .
+
+  *** The functions "left" and "right" return, respectively, the left and right
+  *** child of the tree.
+  ops left right : NeBTree -> BTree .
+  eq [left] : left(BT [E] BT') = ############################## .
+  eq [right] : right(BT [E] BT') = ############################## .
+endfm
+
+
+fmod HEAP is
+  pr BTREE .
+
+  *** The sorts for heaps ("Heap") and nonempty heaps ("NeHeap")
+  *** are declared.
+  sorts Heap NeHeap .
+  *** A nonempty heap is a specific case of a nonempty binary tree and of
+  *** heap, while these two sorts are a specific case of binary tree.
+  subsort ############################## .
+
+  vars E E' E'' : Process .
+  vars BT BT' : BTree .
+  vars H L L' L'' R R' R'' : Heap .
+  vars NL NR : NeHeap .
+
+  *** The empty binary tree is a heap.
+  mb [h1] : empty : Heap .
+  *** A binary tree with just one element is a heap.
+  mb [h2] : empty [E] empty : ##### .
+  *** A binary tree with an empty tree as right child is a heap
+  *** if the left child only contains one element (i.e., its depth is 1)
+  *** and this element is smaller than or equal to the root of the tree.
+  cmb [h3] : NL [E] empty : NeHeap
+   if root(NL) <= E /\
+      ############# .
+  *** Otherwise, a binary tree is a heap if both the left child and the
+  *** right child are heaps (checked by using variables of sort NeHeap),
+  *** the roots of these trees are smaller than or equal to the root of
+  *** the tree, and it is a nearly complete binary tree (which is checked by
+  *** using the depths).
+  cmb [h4] : NL [E] NR : NeHeap
+   if root(NL) <= E /\
+      root(NR) <= E /\
+      (depth(NL) == depth(NR) and complete(NL)) or
+      (depth(NL) == s(depth(NR)) and complete(NR)) .
+
+  *** The function "insert" inserts the natural number given as first
+  *** paramenter in the heap given as second one.
+  op insert : Process Heap -> NeHeap .
+  *** Inserting an element in an empty heap returns a heap with only one
+  *** element.
+  eq [ins1] : insert(E, empty) = empty [E] empty .
+  *** Otherwise, we look with the function "depth" for the next free position and
+  *** recursively use "insert" to insert the appropriate value (the minimum
+  *** between the element being inserted and the root of the corresponding
+  *** tree) in this tree, while the other value (the maximum) is placed
+  *** as the root of the whole tree.
+  ceq [ins2] : insert(E, L [E'] R) = ### [#########] ###
+   if not complete(L) or
+      ((depth(L) == depth(R)) and complete(R)) /\
+      ############################## .
+  ceq [ins3] : insert(E, L [E'] R) = ### [##########] ###
+   if not complete(R) or
+      (depth(L) > depth(R)) and complete(L) /\
+      ############################## .
+
+  *** The function "delete" removes the root of the heap.
+  op delete : NeHeap -> Heap .
+  *** Removing an element from the heap that only contains one element
+  *** returns the empty heap.
+  eq [dl1] : delete(empty [E] empty) = empty .
+  *** Otherwise, we remove the last element of the heap with the auxiliary
+  *** function deleteLast, that returns the heap with this last element
+  *** removed and the element, and then sinks this element with sink.
+  ceq [dl2] : delete(H) = sink(L', E', R')
+   if < L' [E] R', E' > := ############################## .
+
+  *** The sort "DeletionPair" is used to return a pair composed of a heap
+  *** and a natural number when using the function "deleteLast".
+  sort DeletionPair .
+  op <_,_> : Heap Process -> DeletionPair [ctor] .
+
+  *** The function "deleteLast" removes the last element of the heap
+  *** and returns a pair with the heap with this last element removed
+  *** and the element.
+  op deleteLast : ############## -> DeletionPair .
+  *** If the heap only contains one element, the returned heap is empty
+  *** and the element is returned.
+  eq [dll1] : deleteLast(empty [E] empty) = < empty, E > .
+  *** Otherwise, we look for the appropriate child to continue the
+  *** search by using the depth function, use recursively deleteLast
+  *** to do it, and build the tree using the value thus obtained.
+  ceq [dll2] : deleteLast(NL [E] R) = < NL [E] R', E' >
+   if ############################## /\
+      < R', E' > := ############################## .
+  ceq [dll3] : deleteLast(NL [E] R) = < L' [E] R, E' >
+   if ############################## /\
+      < L', E' > := ############################## .
+
+  *** The function "sink" places a value in its appropriate position,
+  *** starting from the root.
+  op sink : Heap Process Heap ~> ############################## .
+  *** If both children are empty, we create a heap with one element.
+  eq [s1] : sink(empty, E, empty) = ############################## .
+  *** If the left child has one single value, we create a tree with
+  *** two values, using max and min to place the appropriate values.
+  eq [s2] : sink(empty [E'] empty, E, empty) = ############# [######] ############# .
+  *** Otherwise, we place the bigger of the three elements (the root of the
+  *** left child, the root of the right child, and the element being sunk)
+  *** as root of the tree, and recursively use sink in the appropriate heap.
+  ceq [s3] : sink(L, E, R) = if E < E'
+                             then if E' < E''
+                                  then L [E''] sink(L'', E, R'')
+                                  else sink(L', E, R') [E'] R
+                                  fi
+                             else if E < E''
+                                  then L [E''] sink(L'', E, R'')
+                                  else L [E] R
+                                  fi
+                             fi
+   if L' [E'] R' := L /\
+      L'' [E''] R'' := R .
+endfm
+
+eof
+
+Maude> red (empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty)) .
+
+Maude> red (empty [< "a", 2 >] empty) [< "b", 8 >] (empty [< "c", 5 >] empty) .
+
+Maude> red ((empty [< "d", 1 >] empty) [< "a", 2 >] (empty [< "e", 1 >] empty)) [< "b", 8 >] ((empty [< "e", 4 >] empty) [< "c", 5 >] empty) .
+
+Maude> red root((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
+
+Maude> red depth((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
+
+Maude> red right((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
+
+

@@ -1,0 +1,64 @@
+load process.maude
+
+mod CRITICAL is
+  pr HEAP .
+
+  *** A process with default ("ProcessWD") is a generalized process that can
+  *** also be equal to "noProcess".
+  sort ProcessWD .
+  subsort Process < ProcessWD .
+  op noProcess : -> ProcessWD [ctor] .
+
+  *** The sort "Processes" stands for a soup of processes built with
+  *** the juxtaposition operator,"__", while a "CPU" is a multiset of processes,
+  *** a heap that orders the processes by using their priority, and a
+  *** critical section represented by a process with default.
+  sorts Processes CPU .
+  subsort Process < Processes .
+
+  op empty : -> Processes [ctor] .
+  op __ : Processes Processes -> Processes [###############] .
+  op _[_][_] : Processes Heap ProcessWD -> CPU [###############] .
+
+  var N : Nat .
+  var H : Heap .
+  var P : Process .
+  var PS : Processes .
+  var S : String .
+  var PWD : ProcessWD .
+
+  *** The rule "ask" introduces a process into the heap, where it is
+  *** appropriately located.
+  rl [ask] : ############################################# .
+
+  *** The process with the highest priority in the heap (i.e., the root)
+  *** is introduced with the "cs" rule in the critical section if it is empty.
+  crl [cs] : PS [H] [noProcess] => ###############
+   if not empty(H) .
+
+  *** The rule "exit" takes the process in the critical section to the
+  *** soup of inactive processes.
+  rl [exit] : ############################################# .
+
+  *** The constants "p1", "p2", "p3", and "initial" are created for
+  *** testing purposes.
+  ops p1 p2 p3 : -> Process .
+  eq p1 = < "p1", 5 > .
+  eq p2 = < "p2", 4 > .
+  eq p3 = < "p3", 3 > .
+
+  op initial : -> CPU .
+  eq initial = p1 p2 p3 [empty] [noProcess] .
+endm
+
+eof
+
+Maude> rew [5] initial .
+
+Maude> rew [7] initial .
+
+Maude> search initial =>* PS:Processes [H:Heap] [< "p3", N:Nat >] .
+
+Maude> search initial =>* PS:Processes [H:Heap] [< S:String, N:Nat >] s.t. S:String == "p2" .
+
+Maude> search initial =>* PS:Processes [H:Heap] [< S:String, N:Nat >] such that S:String == "p1" .
