@@ -11,12 +11,20 @@ fmod PROCESS is
 
   *** "min", "max", "_<_", and "_<=_" over processes are defined by using
   *** their priority.
-  ops min max : Process Process -> ########## [assoc] .
+  ***ops min max : Process Process -> ########## [assoc] .
+  ops min max : Process Process -> Process [assoc] .
   ops _<_ _<=_ : Process Process -> Bool .
 
-  eq min(< S, N >, < S', N' >) = ############################## .
-
-  eq max(< S, N >, < S', N' >) = ############################## .
+  eq min(< S, N >, < S', N' >) = 
+  if N < N' then < S, N >
+  else < S', N'>
+  fi .
+  
+  eq max(< S, N >, < S', N' >) = 
+  if N < N' then < S', N' >
+  else < S, N>
+  fi .
+  
   eq < S, N > < < S', N' > = N < N' .
   eq < S, N > <= < S', N' > = N <= N' .
 endfm
@@ -29,7 +37,7 @@ fmod BTREE is
  *** binary trees ("NeBTree")
  sorts BTree NeBTree .
  *** A nonempty binary tree is also a binary tree.
- subsort ############################## .
+ subsort NeBtree < BTree .
 
   *** The (constant) constructor of an "empty" tree.
   op empty : -> BTree [ctor] .
@@ -44,31 +52,33 @@ fmod BTREE is
   eq [cmp1] : complete(empty) = true .
   eq [cmp2] : complete(BT [E] BT') = complete(BT) and complete(BT') and
                                      depth(BT) == depth(BT') .
-
+  *** altura del nodo
   *** The function "depth" returns the depth of the tree.
-  op depth : BTree -> ############## .
-  eq [dp1] : depth(empty) = ############################## .
-  eq [dp2] : depth(BT [E] BT') = ############################## .
+  op depth : BTree -> Nat .
+  eq [dp1] : depth(empty) = 0 .
+  eq [dp2] : depth(BT [E] BT') = s( max( depth(BT) , depth(BT') )) .
 
   *** The function "empty" checks whether the binary tree is empty.
-  op empty : BTree -> ############ .
-  eq [mt?1] : empty(empty) = ############################## .
-  eq [mt?2] : empty(BT [E] BT') = ############################## .
+  op empty : BTree -> Bool .
+  eq [mt?1] : empty(empty) = True .
+  eq [mt?2] : empty(BT [E] BT') = False .  
 
   *** The function "in?" checks whether the element is in the tree.
   op in? : BTree Process -> Bool .
-  eq [in?1] : in?(empty, E) = ############################## .
-  eq [in?2] : in?(BT [E] BT', E') = ############################## .
+  eq [in?1] : in?(empty, E) = False .
+  eq [in?2] : in?(BT [E] BT', E') = 
+  if E = E' then true
+  else in?(BT) or in?(BT') .
 
   *** The function "root" returns the root of a nonempty tree.
   op root : NeBTree -> Process .
-  eq [root] : root(BT [E] BT') = ############################## .
+  eq [root] : root(BT [E] BT') = E .
 
   *** The functions "left" and "right" return, respectively, the left and right
   *** child of the tree.
   ops left right : NeBTree -> BTree .
-  eq [left] : left(BT [E] BT') = ############################## .
-  eq [right] : right(BT [E] BT') = ############################## .
+  eq [left] : left(BT [E] BT') = BT .
+  eq [right] : right(BT [E] BT') = BT' .
 endfm
 
 
@@ -80,7 +90,7 @@ fmod HEAP is
   sorts Heap NeHeap .
   *** A nonempty heap is a specific case of a nonempty binary tree and of
   *** heap, while these two sorts are a specific case of binary tree.
-  subsort ############################## .
+  subsort NeHeap < Heap  NeBTree < BTree .
 
   vars E E' E'' : Process .
   vars BT BT' : BTree .
@@ -90,13 +100,13 @@ fmod HEAP is
   *** The empty binary tree is a heap.
   mb [h1] : empty : Heap .
   *** A binary tree with just one element is a heap.
-  mb [h2] : empty [E] empty : ##### .
+  mb [h2] : empty [E] empty : NeHeap .
   *** A binary tree with an empty tree as right child is a heap
   *** if the left child only contains one element (i.e., its depth is 1)
   *** and this element is smaller than or equal to the root of the tree.
   cmb [h3] : NL [E] empty : NeHeap
    if root(NL) <= E /\
-      ############# .
+      depth(NL) == 1 .
   *** Otherwise, a binary tree is a heap if both the left child and the
   *** right child are heaps (checked by using variables of sort NeHeap),
   *** the roots of these trees are smaller than or equal to the root of
@@ -119,14 +129,12 @@ fmod HEAP is
   *** between the element being inserted and the root of the corresponding
   *** tree) in this tree, while the other value (the maximum) is placed
   *** as the root of the whole tree.
-  ceq [ins2] : insert(E, L [E'] R) = ### [#########] ###
+  ceq [ins2] : insert(E, L [E'] R) = insert(min(E, E'), L) [max(E, E')] R
    if not complete(L) or
-      ((depth(L) == depth(R)) and complete(R)) /\
-      ############################## .
-  ceq [ins3] : insert(E, L [E'] R) = ### [##########] ###
+      ((depth(L) == depth(R)) and complete(R)) .
+  ceq [ins3] : insert(E, L [E'] R) = L [max(E, E')] insert(min(E, E'), R) 
    if not complete(R) or
-      (depth(L) > depth(R)) and complete(L) /\
-      ############################## .
+      (depth(L) > depth(R)) and complete(L) .
 
   *** The function "delete" removes the root of the heap.
   op delete : NeHeap -> Heap .
@@ -135,9 +143,9 @@ fmod HEAP is
   eq [dl1] : delete(empty [E] empty) = empty .
   *** Otherwise, we remove the last element of the heap with the auxiliary
   *** function deleteLast, that returns the heap with this last element
-  *** removed and the element, and then sinks this element with sink.
+  *** removed and the element, and then sinks this element with sink. Hundir
   ceq [dl2] : delete(H) = sink(L', E', R')
-   if < L' [E] R', E' > := ############################## .
+   if < L' [E] R', E' > := < left(H) E right(H), root(H) > .
 
   *** The sort "DeletionPair" is used to return a pair composed of a heap
   *** and a natural number when using the function "deleteLast".
