@@ -217,16 +217,49 @@ mod TIENDA is
      L' := vender(L, S, N) /\
      D' := D + (precio(L, S) * N) .
  )
-
+ ***(
  crl [nuevas-pelis] :
      [ representante(S, N, V) G | P, L, D ]
   => [ G | insertar(P, S, < N, V * 2 >), L, sd(D, N * V) ]
   if N * V <= D .
+  
 
  crl [nuevos-libros] :
      [ representante(S, N, V) G | P, L, D ]
   => [ G | P, insertar(L, S, < N, V * 2 >), sd(D, N * V) ]
   if N * V <= D .
+ )
+
+ crl [nuevas-pelis] : 
+     [ representante(S, N, V) G | P, L, D ]
+  => [ representante(S, sd(N,1), V) G | insertar(P, S, < 1, V * 2 >), L, sd(D, V) ]
+  if V <= D and N =/= 0 .
+
+ crl [nuevas-pelis] : [ representante(S, N, V) G | P, L, D ]
+  => [ G | P, L, D ]
+  if N == 0 .
+
+ crl [nuevos-libros] : 
+     [ representante(S, N, V) G | P, L, D ]
+  => [ representante(S, sd(N,1), V) G | P, insertar(L, S, < 1, V * 2 >), sd(D, V) ]
+  if V <= D and N =/= 0 .
+
+ crl [nuevos-libros] : [ representante(S, N, V) G | P, L, D ]
+  => [ G | P, L, D ]
+  if N == 0 .
+
+ ***(
+  crl [venta-peli] :
+     [ comprador(S, N) G | P, L, D ] =>
+     [ comprador(S, sd(N,1)) G | vender(P, S, 1), L, D + (precio(P, S))]
+  if N =/= 0 and cantidad(P, S) > 0 .
+
+  crl [venta-peli] :
+     [ comprador(S, N) G | P, L, D ] =>
+     [ G | P, L, D]
+  if N == 0 .
+ )
+
 endm
 
 mod EJEMPLO is
@@ -243,7 +276,7 @@ mod EJEMPLO is
  eq r3 = representante("c", 3, 30) .
 
  op tienda : -> Tienda .
- eq tienda = [ c1 c2 c3 | vacio, ourF, 100] .
+ eq tienda = [ r1 r2 r3 | vacio, vacio, 10000] .
  ***eq tienda = [ c1 c2 c3 r1 r2 r3 | ourF, vacio, 100] .
 endm
 
