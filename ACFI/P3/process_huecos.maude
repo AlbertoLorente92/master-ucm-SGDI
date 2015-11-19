@@ -11,18 +11,17 @@ fmod PROCESS is
 
   *** "min", "max", "_<_", and "_<=_" over processes are defined by using
   *** their priority.
-  ***ops min max : Process Process -> ########## [assoc] .
   ops min max : Process Process -> Process [assoc] .
   ops _<_ _<=_ : Process Process -> Bool .
 
   eq min(< S, N >, < S', N' >) = 
   if N < N' then < S, N >
-  else < S', N'>
+  else < S', N' >
   fi .
   
   eq max(< S, N >, < S', N' >) = 
   if N < N' then < S', N' >
-  else < S, N>
+  else < S, N >
   fi .
   
   eq < S, N > < < S', N' > = N < N' .
@@ -37,7 +36,7 @@ fmod BTREE is
  *** binary trees ("NeBTree")
  sorts BTree NeBTree .
  *** A nonempty binary tree is also a binary tree.
- subsort NeBtree < BTree .
+ subsort NeBTree < BTree .
 
   *** The (constant) constructor of an "empty" tree.
   op empty : -> BTree [ctor] .
@@ -60,15 +59,16 @@ fmod BTREE is
 
   *** The function "empty" checks whether the binary tree is empty.
   op empty : BTree -> Bool .
-  eq [mt?1] : empty(empty) = True .
-  eq [mt?2] : empty(BT [E] BT') = False .  
+  eq [mt?1] : empty(empty) = true .
+  eq [mt?2] : empty(BT [E] BT') = false .  
 
   *** The function "in?" checks whether the element is in the tree.
   op in? : BTree Process -> Bool .
-  eq [in?1] : in?(empty, E) = False .
+  eq [in?1] : in?(empty, E) = false .
   eq [in?2] : in?(BT [E] BT', E') = 
-  if E = E' then true
-  else in?(BT) or in?(BT') .
+  if E == E' then true
+  else in?(BT, E) or in?(BT', E) 
+  fi .
 
   *** The function "root" returns the root of a nonempty tree.
   op root : NeBTree -> Process .
@@ -145,7 +145,7 @@ fmod HEAP is
   *** function deleteLast, that returns the heap with this last element
   *** removed and the element, and then sinks this element with sink. Hundir
   ceq [dl2] : delete(H) = sink(L', E', R')
-   if < L' [E] R', E' > := < left(H) E right(H), root(H) > .
+   if < L' [E] R', E' > := deleteLast(H) .
 
   *** The sort "DeletionPair" is used to return a pair composed of a heap
   *** and a natural number when using the function "deleteLast".
@@ -155,7 +155,7 @@ fmod HEAP is
   *** The function "deleteLast" removes the last element of the heap
   *** and returns a pair with the heap with this last element removed
   *** and the element.
-  op deleteLast : ############## -> DeletionPair .
+  op deleteLast : NeHeap -> DeletionPair .
   *** If the heap only contains one element, the returned heap is empty
   *** and the element is returned.
   eq [dll1] : deleteLast(empty [E] empty) = < empty, E > .
@@ -163,20 +163,20 @@ fmod HEAP is
   *** search by using the depth function, use recursively deleteLast
   *** to do it, and build the tree using the value thus obtained.
   ceq [dll2] : deleteLast(NL [E] R) = < NL [E] R', E' >
-   if ############################## /\
-      < R', E' > := ############################## .
+   if depth(NL) == depth(R) /\
+      < R', E' > := deleteLast(R) .
   ceq [dll3] : deleteLast(NL [E] R) = < L' [E] R, E' >
-   if ############################## /\
-      < L', E' > := ############################## .
+   if depth(NL) > depth(R) /\
+      < L', E' > := deleteLast(NL) .
 
   *** The function "sink" places a value in its appropriate position,
   *** starting from the root.
-  op sink : Heap Process Heap ~> ############################## .
+  op sink : Heap Process Heap ~> NeHeap .
   *** If both children are empty, we create a heap with one element.
-  eq [s1] : sink(empty, E, empty) = ############################## .
+  eq [s1] : sink(empty, E, empty) = empty [E] empty .
   *** If the left child has one single value, we create a tree with
   *** two values, using max and min to place the appropriate values.
-  eq [s2] : sink(empty [E'] empty, E, empty) = ############# [######] ############# .
+  eq [s2] : sink(empty [E'] empty, E, empty) = (empty [min(E, E')] empty) [max(E, E')] empty .
   *** Otherwise, we place the bigger of the three elements (the root of the
   *** left child, the root of the right child, and the element being sunk)
   *** as root of the tree, and recursively use sink in the appropriate heap.
@@ -196,16 +196,21 @@ endfm
 
 eof
 
-Maude> red (empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty)) .
+red (empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty)) .
 
-Maude> red (empty [< "a", 2 >] empty) [< "b", 8 >] (empty [< "c", 5 >] empty) .
+red (empty [< "a", 2 >] empty) [< "b", 8 >] (empty [< "c", 5 >] empty) .
 
-Maude> red ((empty [< "d", 1 >] empty) [< "a", 2 >] (empty [< "e", 1 >] empty)) [< "b", 8 >] ((empty [< "e", 4 >] empty) [< "c", 5 >] empty) .
+red ((empty [< "d", 1 >] empty) [< "a", 2 >] (empty [< "e", 1 >] empty)) [< "b", 8 >] ((empty [< "e", 4 >] empty) [< "c", 5 >] empty) .
 
-Maude> red root((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
+red root((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
 
-Maude> red depth((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
+red depth((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
 
-Maude> red right((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
+red right((empty [< "a", 2 >] empty) [< "b", 3 >] (empty [< "c", 5 >] (empty [< "d", 6 >] empty))) .
 
+red delete(((empty [< "d", 1 >] empty) [< "a", 2 >] (empty [< "e", 1 >] empty)) [< "b", 8 >] ((empty [< "e", 4 >] empty) [< "c", 5 >] empty)) .
+
+red delete(((empty [< "d", 1 >] empty) [< "a", 2 >] (empty [< "e", 1 >] empty)) [< "b", 8 >] (empty [< "c", 5 >] empty)) .
+
+red delete(((empty [< "d", 1 >] empty) [< "a", 2 >] empty) [< "b", 8 >] (empty [< "c", 5 >] empty)) .
 
