@@ -1,5 +1,4 @@
 import csv
-import re
 from scipy.spatial import distance
 from collections import Counter
 
@@ -33,14 +32,18 @@ def knn(k, i, c):
   clases = Counter([x[0] for x in dist_min])
   return max(clases, key=clases.get)
 
+def test(k, trainset, testset):
+  aux = []
+  for test in testset:
+    clase = knn(k, test, trainset)
+    if test[-1] == clase: aux +=[True]
+    else: aux +=[False]
+  return aux.count(True)/float(len(aux))
+
 def pruebas():
-  ent = read_file('iris.csv')
-  test = read_file('iris_test.csv')
-  
-  for t in test:
-    clase = knn(136, t, ent)
-    if t[-1] == clase:
-      print t, "\t-->", clase, "\t-->", "Bien clasificado"
-    else:
-      print t, "\t-->", clase, "\t-->", "Mal clasificado"
+  train_set = read_file('iris.csv')
+  test_set = read_file('iris_test.csv')
+  aux = test (5, train_set, test_set )
+  print aux
+
 pruebas()
