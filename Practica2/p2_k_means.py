@@ -9,8 +9,15 @@ def read_file(filename):
   return [[int(y) for y in x] for x in lista[1:]]
 
 def kmeans(k, instancias, centroides_ini = None):
-  pass  
-
+  if centroides_ini == None:
+    centroides_ini = getCentroids(k,instancias)
+  
+  
+def closestCentroid(ins, centroides_ini):
+  listaDistancias = []
+  for cent in centroides_ini:
+    listaDistancias.append(distance.euclidean(cent,ins))
+  return listaDistancias.index(min(listaDistancias))
 
 def getCentroids(k, instancias):
   listaCentroids = [instancias[0]]
