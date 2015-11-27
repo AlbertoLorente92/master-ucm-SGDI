@@ -25,7 +25,7 @@ def kmeans(k, instancias, centroides_ini = None):
 def getCluster(centroids, instancias):
   listCluster = [[] for x in range(0,len(centroids))]
   for ins in instancias:
-    index = closestCentroid(ins,centroids)
+    index = getMinMaxToTarget(ins,centroids)
     listCluster[index].append(ins)
   return listCluster
 
@@ -36,12 +36,6 @@ def recalcular_centroides(newListCluster):
     aux2 = np.mean(lista, axis=0).tolist()
     listaAux.append(aux2)
   return listaAux
-
-def closestCentroid(ins, centroides_ini):
-  listaDistancias = []
-  for cent in centroides_ini:
-    listaDistancias.append(distance.euclidean(cent,ins))
-  return listaDistancias.index(min(listaDistancias))
 
 def getCentroids(k, instancias):
   listaCentroids = [instancias[0]]
@@ -59,11 +53,38 @@ def getDistancia(i1, lista_ins):
     dist+=distance.euclidean(i1,ins)
   return dist
 
+def getMinMaxToTarget(target, theList, theFunc = min):
+  listDistances = []
+  for elem in theList:
+    listDistances.append(distance.euclidean(target,elem))
+  return listDistances.index(theFunc(listDistances))
+
+def getMinMaxDistFromList(listaCluster, theFunc = max):
+  distMin = -1
+  for x in range(0,len(listaCluster)):
+    for y in range(x,len(listaCluster)):
+      if distance.euclidean(listaCluster[x],listaCluster[y]) > distMin:
+        distMin = distance.euclidean(listaCluster[x],listaCluster[y])
+  return distMin
+
 def prueba():
   aux = read_file('customers.csv')
   (clusters, centroids) = kmeans(4,aux)
   for clus, cent in zip(clusters, centroids):
     print "cent: ",cent 
     print "clus: ",clus
+ 
+  print "------------------------------------------------------------------------"
+  listRadios = []
+  listDiametros = []
+  for clus, cent in zip(clusters, centroids):
+    listRadios.append(distance.euclidean(cent,clus[getMinMaxToTarget(cent,clus,max)]))
+    listDiametros.append(getMinMaxDistFromList(clus))
+
+
+  print listRadios
+  #print [2.0*x for x in listRadios]
+  print "------------------------------------------------------------------------"
+  print listDiametros
 
 prueba()
