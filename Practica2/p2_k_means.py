@@ -2,6 +2,7 @@ import csv
 from scipy.spatial import distance
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 def read_file(filename):
   infile = open(filename, 'r')
@@ -79,8 +80,8 @@ def prueba():
   listDiametros = []
   listDistancia = []
   
-  for i in range(2,20):
-    (clusters, centroids) = kmeans(int(i),aux)
+  for i in range(2,6):
+    (clusters, centroids) = kmeans(i,aux)
     #for clus, cent in zip(clusters, centroids):
       #print ("cent: ",cent) 
       #print ("clus: ",clus)
@@ -97,5 +98,17 @@ def prueba():
   print (listDiametros)
   print ("------------------------------------------------------------------------")
   print (listDistancia)
+  
+  plt.plot(listRadios)
+  plt.xlabel('K-centros')
+  plt.savefig('Radios.png')
+  
+  plt.plot(listDiametros)
+  plt.xlabel('K-centros')
+  plt.savefig('Diametros.png')
+  
+  plt.plot(listDistancia)
+  plt.xlabel('K-centros')
+  plt.savefig('Distancia.png')
   
 prueba()
