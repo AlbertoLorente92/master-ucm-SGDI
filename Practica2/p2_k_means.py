@@ -1,8 +1,7 @@
 import csv
 from scipy.spatial import distance
-#from collections import Counter
 import numpy as np
-
+import math
 
 def read_file(filename):
   infile = open(filename, 'r')
@@ -24,6 +23,7 @@ def kmeans(k, instancias, centroides_ini = None):
 
 def getCluster(centroids, instancias):
   listCluster = [[] for x in range(0,len(centroids))]
+  i = 0
   for ins in instancias:
     index = getMinMaxToTarget(ins,centroids)
     listCluster[index].append(ins)
@@ -67,24 +67,35 @@ def getMinMaxDistFromList(listaCluster, theFunc = max):
         distMin = distance.euclidean(listaCluster[x],listaCluster[y])
   return distMin
 
+def getAverageDistance(centroid, cluster):
+  dist = 0
+  for instance in cluster:
+    dist = dist + math.pow(distance.euclidean(instance,centroid), 2)
+  return dist//len(cluster)
+  
 def prueba():
   aux = read_file('customers.csv')
-  (clusters, centroids) = kmeans(4,aux)
-  for clus, cent in zip(clusters, centroids):
-    print "cent: ",cent 
-    print "clus: ",clus
- 
-  print "------------------------------------------------------------------------"
   listRadios = []
   listDiametros = []
-  for clus, cent in zip(clusters, centroids):
-    listRadios.append(distance.euclidean(cent,clus[getMinMaxToTarget(cent,clus,max)]))
-    listDiametros.append(getMinMaxDistFromList(clus))
+  listDistancia = []
+  
+  for i in range(2,20):
+    (clusters, centroids) = kmeans(int(i),aux)
+    #for clus, cent in zip(clusters, centroids):
+      #print ("cent: ",cent) 
+      #print ("clus: ",clus)
+ 
 
-
-  print listRadios
-  #print [2.0*x for x in listRadios]
-  print "------------------------------------------------------------------------"
-  print listDiametros
-
+    for clus, cent in zip(clusters, centroids):
+      listRadios.append(distance.euclidean(cent,clus[getMinMaxToTarget(cent,clus,max)]))
+      listDiametros.append(getMinMaxDistFromList(clus))
+      listDistancia.append(getAverageDistance(cent,clus))
+	
+  print ("------------------------------------------------------------------------")
+  print (listRadios)
+  print ("------------------------------------------------------------------------")
+  print (listDiametros)
+  print ("------------------------------------------------------------------------")
+  print (listDistancia)
+  
 prueba()
