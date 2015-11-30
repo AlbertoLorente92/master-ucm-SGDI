@@ -35,11 +35,11 @@ def recalcular_centroides(newListCluster,centroides):
   for lista, cent in zip(newListCluster, centroides):
     lista = np.array(lista)
     if len(lista) == 0:
-	  listaAux.append(cent)
-	  continue
-    aux2 = np.mean(lista, axis=0).tolist()
-    #print lista, aux2
-    listaAux.append(aux2)
+      listaAux.append(cent)
+    else:
+      aux2 = np.mean(lista, axis=0).tolist()
+      #print lista, aux2
+      listaAux.append(aux2)
   return listaAux
 
 def getCentroids(k, instancias):
@@ -65,18 +65,34 @@ def getMinMaxToTarget(target, theList, theFunc = min):
   return listDistances.index(theFunc(listDistances))
 
 def getMinMaxDistFromList(listaCluster, theFunc = max):
-  distMin = -1
+  distMin = -1.0
   for x in range(0,len(listaCluster)):
-    for y in range(x,len(listaCluster)):
-      if distance.euclidean(listaCluster[x],listaCluster[y]) > distMin:
-        distMin = distance.euclidean(listaCluster[x],listaCluster[y])
+    for y in range(x+1,len(listaCluster)):
+      aux = distance.euclidean(listaCluster[x],listaCluster[y]) ##Si solo hay 2 instancias esto da = nan
+      if len(listaCluster) == 2:
+        print(aux,"---->>",listaCluster[x], "---",listaCluster[y])   
+        aux = distanciaAMano(listaCluster[x],listaCluster[y])  ##pero si lo calculo todo manual funciona
+      if aux > distMin:
+        distMin = aux
   return distMin
 
 def getAverageDistance(centroid, cluster):
-  dist = 0
+  dist = 0.0
   for instance in cluster:
     dist = dist + math.pow(distance.euclidean(instance,centroid), 2)
   return dist//len(cluster)
+
+def distanciaAMano(ins1,ins2):
+  a1 = math.pow(math.fabs(ins1[0]-ins2[0]),2)
+  a2 = math.pow(math.fabs(ins1[1]-ins2[1]),2)
+  a3 = math.pow(math.fabs(ins1[2]-ins2[2]),2)
+  a4 = math.pow(math.fabs(ins1[3]-ins2[3]),2)  
+  a5 = math.pow(math.fabs(ins1[4]-ins2[4]),2)  
+  a6 = math.pow(math.fabs(ins1[5]-ins2[5]),2)
+  suma = a1+a2+a3+a4+a5+a6
+  total = math.sqrt(suma)
+  #print (total)
+  return total
   
 def prueba():
   aux = read_file('customers.csv')
@@ -84,14 +100,15 @@ def prueba():
   listDiametros = []
   listDistancia = []
   
-  for i in range(7,9):
+  for i in range(2,21):
     (clusters, centroids) = kmeans(i,aux)
     listRadios = []
     listDiametros = []
     listDistancia = []
     
     for clus, cent in zip(clusters, centroids):
-      if len(clus) == 0:
+      tamanho = len(clus)
+      if tamanho <= 1:
         listRadios.append(0)
         listDiametros.append(0)
         listDistancia.append(0)
