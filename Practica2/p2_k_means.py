@@ -19,7 +19,7 @@ def kmeans(k, instancias, centroides_ini = None):
     if newListCluster == oldListCluster:
       break
     oldListCluster = newListCluster
-    centroides_ini = recalcular_centroides(newListCluster)
+    centroides_ini = recalcular_centroides(newListCluster,centroides_ini)
   return (newListCluster , centroides_ini)
 
 def getCluster(centroids, instancias):
@@ -30,11 +30,15 @@ def getCluster(centroids, instancias):
     listCluster[index].append(ins)
   return listCluster
 
-def recalcular_centroides(newListCluster):
+def recalcular_centroides(newListCluster,centroides):
   listaAux = []
-  for lista in newListCluster:
+  for lista, cent in zip(newListCluster, centroides):
     lista = np.array(lista)
+    if len(lista) == 0:
+	  listaAux.append(cent)
+	  continue
     aux2 = np.mean(lista, axis=0).tolist()
+    #print lista, aux2
     listaAux.append(aux2)
   return listaAux
 
@@ -80,24 +84,29 @@ def prueba():
   listDiametros = []
   listDistancia = []
   
-  for i in range(2,6):
+  for i in range(7,9):
     (clusters, centroids) = kmeans(i,aux)
-    #for clus, cent in zip(clusters, centroids):
-      #print ("cent: ",cent) 
-      #print ("clus: ",clus)
- 
-
+    listRadios = []
+    listDiametros = []
+    listDistancia = []
+    
     for clus, cent in zip(clusters, centroids):
-      listRadios.append(distance.euclidean(cent,clus[getMinMaxToTarget(cent,clus,max)]))
-      listDiametros.append(getMinMaxDistFromList(clus))
-      listDistancia.append(getAverageDistance(cent,clus))
-	
-  print ("------------------------------------------------------------------------")
-  print (listRadios)
-  print ("------------------------------------------------------------------------")
-  print (listDiametros)
-  print ("------------------------------------------------------------------------")
-  print (listDistancia)
+      if len(clus) == 0:
+        listRadios.append(0)
+        listDiametros.append(0)
+        listDistancia.append(0)
+      else:
+        listRadios.append(distance.euclidean(cent,clus[getMinMaxToTarget(cent,clus,max)]))
+        listDiametros.append(getMinMaxDistFromList(clus))
+        listDistancia.append(getAverageDistance(cent,clus))
+	 
+    print ("$$$$$$$$$$$$")
+    print ("------------------------------------------------------------------------")
+    print (listRadios)
+    print ("------------------------------------------------------------------------")
+    print (listDiametros)
+    print ("------------------------------------------------------------------------")
+    print (listDistancia)
   
   plt.plot(listRadios)
   plt.xlabel('K-centros')
