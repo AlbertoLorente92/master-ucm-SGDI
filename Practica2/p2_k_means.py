@@ -3,6 +3,7 @@ from scipy.spatial import distance
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from matplotlib.finance import candlestick
 
 def read_file(filename):
   infile = open(filename, 'r')
@@ -47,12 +48,12 @@ def getCentroids(k, instancias):
   for i in range(1,k):
     listaDistancias = []
     for ins in instancias:
-      listaDistancias.append(getDistancia(ins,listaCentroids))
+      listaDistancias.append(getDist(ins,listaCentroids))
     max_pos = listaDistancias.index(max(listaDistancias))
     listaCentroids.append(instancias[max_pos])
   return listaCentroids
 
-def getDistancia(i1, lista_ins):
+def getDist(i1, lista_ins):
   dist = 0.0
   for ins in lista_ins:
     dist+=distance.euclidean(i1,ins)
@@ -77,37 +78,62 @@ def getAverageDistance(centroid, cluster):
   for instance in cluster:
     dist = dist + math.pow(distance.euclidean(instance,centroid), 2)
   return dist//len(cluster)
+
+def getRadio(clus, cent):
+  if len(clus) == 0: return 0.0
+  return distance.euclidean(cent,clus[getMinMaxToTarget(cent,clus,max)])
+
+def getDiametro(clus):
+  if len(clus) == 0: return 0.0
+  return getMinMaxDistFromList(clus)
+
+def getDistancia(clus, cent):
+  if len(clus) == 0: return 0.0
+  return getAverageDistance(cent,clus)
+
+def getRadios(clusters, centorids):
+  listaRadios = []
+  for clus, cent in zip(clusters, centorids):
+    listaRadios.append(getRadio(clus, cent))
+  return listaRadios
+
+def getDiametros(clusters):
+  listaDiametros = []
+  for clus in clusters:
+    listaDiametros.append(getDiametro(clus))
+  return listaDiametros
+
+def getDistancias(clusters, centroids):
+  listaDistancias = []
+  for clus, cent in zip(clusters, centroids):
+    listaDistancias.append(getDistancia(clus, cent))
+  return listaDistancias
+
+def getStats(lista):
+  return [ np.mean(lista)-np.std(lista), np.mean(lista)+np.std(lista), min(lista), max(lista) ]
   
 def prueba():
   aux = read_file('customers.csv')
-  listRadios = []
-  listDiametros = []
-  listDistancia = []
+  radios = []
+  diametros = []
+  distancias = []
   
-  for i in range(7,9):
+  for i in xrange(2,20):
     (clusters, centroids) = kmeans(i,aux)
-    listRadios = []
-    listDiametros = []
-    listDistancia = []
-    
-    for clus, cent in zip(clusters, centroids):
-      if len(clus) == 0:
-        listRadios.append(0)
-        listDiametros.append(0)
-        listDistancia.append(0)
-      else:
-        listRadios.append(distance.euclidean(cent,clus[getMinMaxToTarget(cent,clus,max)]))
-        listDiametros.append(getMinMaxDistFromList(clus))
-        listDistancia.append(getAverageDistance(cent,clus))
-	 
-    print ("$$$$$$$$$$$$")
-    print ("------------------------------------------------------------------------")
-    print (listRadios)
-    print ("------------------------------------------------------------------------")
-    print (listDiametros)
-    print ("------------------------------------------------------------------------")
-    print (listDistancia)
-  
+    listRadios     = getRadios(clusters, centroids)
+    listDiametros  = getDiametros(clusters)
+    listDistancias = getDistancias(clusters, centroids)
+    radios.append(     [i]+getStats(listRadios))
+    diametros.append(  [i]+getStats(listDiametros))
+    distancias.append( [i]+getStats(listDistancias))
+
+  print radios
+  fig, ax = plt.subplots()
+  fig.subplots_adjust(bottom=0.2)
+  candlestick(ax, radios, width=0.2, alpha=0.5)
+  plt.show()
+
+  """ 
   plt.plot(listRadios)
   plt.xlabel('K-centros')
   plt.savefig('Radios.png')
@@ -119,5 +145,6 @@ def prueba():
   plt.plot(listDistancia)
   plt.xlabel('K-centros')
   plt.savefig('Distancia.png')
-  
+  """
+
 prueba()
