@@ -69,9 +69,10 @@ def getMinMaxDistFromList(listaCluster, theFunc = max):
   for x in range(0,len(listaCluster)):
     for y in range(x+1,len(listaCluster)):
       aux = distance.euclidean(listaCluster[x],listaCluster[y]) ##Si solo hay 2 instancias esto da = nan
-      if len(listaCluster) == 2:
+      if len(listaCluster) == 2: # No se, creo que esto sobra, imprimiendo antes y después veo los mismos valores.
         print(aux,"---->>",listaCluster[x], "---",listaCluster[y])   
         aux = distanciaAMano(listaCluster[x],listaCluster[y])  ##pero si lo calculo todo manual funciona
+        print aux
       if aux > distMin:
         distMin = aux
   return distMin
