@@ -2,7 +2,7 @@ import csv
 from scipy.spatial import distance
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+from collections import Counter
 
 def read_file(filename):
   infile = open(filename, 'r')
@@ -16,12 +16,20 @@ def read_file(filename):
     attrib_dic[aux[i]] = (i , aux2)	
   classes =list(set([x[-1] for x in lista[1:]]))
   return (inst,attrib_dic,classes)
+
+def id3(inst, attrib_dic, classes, candidates):
+  pass
+
+def entr(tList):
+  entrSum = 0.0
+  tLen = float(len(tList))
+  aux = Counter(tList)
+  for key, val in aux.iteritems():
+    entrSum += -(val/tLen * math.log(val/tLen,2))
+  return entrSum
+  
   
 def prueba():
   aux = read_file('car.csv')
-  print (len(aux[0]))
-  print ("------------------------------------------------------------------------")
-  print (aux[1])
-  print ("------------------------------------------------------------------------")
-  print (aux[2])
+  print entr([3,2,3,1,3,2,3,1])
 prueba()
