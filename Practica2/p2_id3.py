@@ -20,7 +20,19 @@ def read_file(filename):
   return (inst,attrib_dic,classes)
 
 def id3(inst, attrib_dic, classes, candidates):
-  pass
+  claseModa = max(set(classes), key=classes.count)
+  attr = selecciona_atributo(attrib_dic, inst)
+  arbol = {'nombre':attr, 'hijos':[]}
+  for val in candidates[attr][1]:
+    subConj = getSubConjunto(candidates[attr][0], val, inst)
+    if len(subConj) == 0:
+      hoja = {'nombre':claseModa, 'hijos':[]}
+    else:
+      hoja = id3(subConj, my_dict, classes, candidates.pop(attr))
+    arbol['hijos'].append(hoja)
+  return arbol
+
+    print subConj
 
 def entr(tList):
   entrSum = 0.0
@@ -42,7 +54,6 @@ def selecciona_atributo(attrDict, tList):
   attrListEntr = {}
   for attrName, attrInfo in attrDict.iteritems():
     attrListEntr[attrName] = entrAttr(attrInfo, tList)
-  print attrListEntr # TODO quitar este print
   return min(attrListEntr, key=attrListEntr.get)
   
 def getSubConjunto(attrIndex, attrVal, tList):
@@ -55,10 +66,11 @@ def prueba():
   attrib_dic = {}
   for i in range(0,len(attrNames)-1):
     aux2 = list(set([x[i] for x in aux[1:]]))
-    attrib_dic[attrNames[i]] = (i , aux2)	
+    attrib_dic[attrNames[i]] = (i , aux2)
+  classes =list(set([x[-1] for x in aux[1:]]))
   # Esto es lo que haria el read_file, pero manual.
 
-  print selecciona_atributo(attrib_dic, inst)
+  id3(inst, attrib_dic, classes, attrib_dic)
 
 aux = [
   ['atr1', 'atr2', 'atr3', 'atr4', 'class'],
