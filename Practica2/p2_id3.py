@@ -3,6 +3,7 @@ from scipy.spatial import distance
 import numpy as np
 import math
 from collections import Counter
+import json
 
 def read_file(filename):
   infile = open(filename, 'r')
@@ -20,19 +21,24 @@ def read_file(filename):
   return (inst,attrib_dic,classes)
 
 def id3(inst, attrib_dic, classes, candidates):
-  claseModa = max(set(classes), key=classes.count)
+  listClases = [x[-1] for x in inst]
+  if len(set(listClases)) == 1:
+    return {'clase' : listClases[0]}
+  claseModa = max(set(listClases), key=listClases.count)
+  if len(candidates) == 0:
+    return {'clase' : claseModa}
+
   attr = selecciona_atributo(attrib_dic, inst)
   arbol = {'nombre':attr, 'hijos':[]}
   for val in candidates[attr][1]:
     subConj = getSubConjunto(candidates[attr][0], val, inst)
     if len(subConj) == 0:
-      hoja = {'nombre':claseModa, 'hijos':[]}
+      hoja = {'clase':claseModa}
     else:
-      hoja = id3(subConj, my_dict, classes, candidates.pop(attr))
-    arbol['hijos'].append(hoja)
+      #hoja = id3(subConj, attrib_dic, classes, candidates.pop(attr))
+      hoja = id3(subConj, attrib_dic, classes, {k:v for k,v in candidates.iteritems() if k != attr})
+    arbol['hijos'].append({val : hoja})
   return arbol
-
-    print subConj
 
 def entr(tList):
   entrSum = 0.0
@@ -70,7 +76,9 @@ def prueba():
   classes =list(set([x[-1] for x in aux[1:]]))
   # Esto es lo que haria el read_file, pero manual.
 
-  id3(inst, attrib_dic, classes, attrib_dic)
+  aaa = id3(inst, attrib_dic, classes, attrib_dic)
+  print json.dumps(aaa, indent=4)
+
 
 aux = [
   ['atr1', 'atr2', 'atr3', 'atr4', 'class'],
