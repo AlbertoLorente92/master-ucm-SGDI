@@ -23,21 +23,21 @@ def read_file(filename):
 def id3(inst, attrib_dic, classes, candidates):
   listClases = [x[-1] for x in inst]
   if len(set(listClases)) == 1:
-    return {'clase' : listClases[0]}
+    return {'nombre' : listClases[0]}
   claseModa = max(set(listClases), key=listClases.count)
   if len(candidates) == 0:
-    return {'clase' : claseModa}
+    return {'nombre' : claseModa}
 
   attr = selecciona_atributo(attrib_dic, inst)
-  arbol = {'nombre':attr, 'hijos':[]}
+  arbol = {'nombre':attr, 'hijos':{}}
   for val in candidates[attr][1]:
     subConj = getSubConjunto(candidates[attr][0], val, inst)
     if len(subConj) == 0:
-      hoja = {'clase':claseModa}
+      hoja = {'nombre' : claseModa}
     else:
       #hoja = id3(subConj, attrib_dic, classes, candidates.pop(attr))
       hoja = id3(subConj, attrib_dic, classes, {k:v for k,v in candidates.iteritems() if k != attr})
-    arbol['hijos'].append({val : hoja})
+    arbol['hijos'][val] = hoja
   return arbol
 
 def entr(tList):
@@ -66,46 +66,30 @@ def getSubConjunto(attrIndex, attrVal, tList):
   return [x for x in tList if x[attrIndex] == attrVal]
  
 def prueba():
-  # Esto es lo que haria el read_file, pero manual.
-  inst = aux[1:]
-  attrNames= aux[0]
-  attrib_dic = {}
-  for i in range(0,len(attrNames)-1):
-    aux2 = list(set([x[i] for x in aux[1:]]))
-    attrib_dic[attrNames[i]] = (i , aux2)
-  classes =list(set([x[-1] for x in aux[1:]]))
-  # Esto es lo que haria el read_file, pero manual.
-
+  inst,attrib_dic,classes = read_file('car.csv')
   aaa = id3(inst, attrib_dic, classes, attrib_dic)
   print json.dumps(aaa, indent=4)
+  write_dot_tree(aaa, 'aux.dot')
 
+def write_dot_tree(id3_tree, filename):
+  to_write = 'digraph graphname {\n'
+  to_write += getDot(id3_tree)
+  to_write += '}\n'
+  fd = open(filename, 'w')
+  fd.write(to_write)
+  fd.close()
 
-aux = [
-  ['atr1', 'atr2', 'atr3', 'atr4', 'class'],
-  [1,1,1,1,3],
-  [1,1,1,2,2],
-  [1,1,2,1,3],
-  [1,1,2,2,1],
-  [1,2,1,1,3],
-  [1,2,1,2,2],
-  [1,2,2,1,3],
-  [1,2,2,2,1],
-  [2,1,1,1,3],
-  [2,1,1,2,2],
-  [2,1,2,1,3],
-  [2,1,2,2,1],
-  [2,2,1,1,3],
-  [2,2,1,2,2],
-  [2,2,2,1,3],
-  [2,2,2,2,3],
-  [3,1,1,1,3],
-  [3,1,1,2,3],
-  [3,1,2,1,3],
-  [3,1,2,2,1],
-  [3,2,1,1,3],
-  [3,2,1,2,2],
-  [3,2,2,1,3],
-  [3,2,2,2,3] ]
+def getDot(tDict, count = [0]):
+  out = ''
+  nombreOld = tDict['nombre'] 
+  tDict['nombre'] += `count[0]`
+  count[0] += 1
+  out += '{} [label="{}"];\n'.format(tDict['nombre'], nombreOld )
+  if 'hijos' in tDict:
+    for hijoK, hijoV in tDict['hijos'].iteritems():
+      out += getDot(hijoV, count=count)
+      out += '{} -> {} [ label="{}" ];\n'.format(tDict['nombre'], hijoV['nombre'], hijoK )
+  return out
 
 prueba()
 
