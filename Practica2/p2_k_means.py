@@ -44,7 +44,7 @@ def recalcular_centroides(newListCluster,centroides):
 
 def getCentroids(k, instancias):
   listaCentroids = [instancias[0]]
-  for i in range(0,k):
+  for i in range(0,k-1):
     listaDistancias = []
     for ins in instancias:
       listaDistancias.append(getDist(ins,listaCentroids))
@@ -58,19 +58,23 @@ def getDist(i1, lista_ins):
     dist+=distance.euclidean(i1,ins)
   return dist
 
+### Devuelve el elemento del cluster "theList" que tiene la distancia maxima/minima (theFunc) al centro "target"
 def getMinMaxToTarget(target, theList, theFunc = min):
   listDistances = []
   for elem in theList:
     listDistances.append(distance.euclidean(target,elem))
   return listDistances.index(theFunc(listDistances))
 
+### Devuelve la distancia maxima/minima (theFunc) que existe entre todos los elementos del cluster
 def getMinMaxDistFromList(listaCluster, theFunc = max):
-  distMin = -1.0
+  distMin = None
   for x in range(0,len(listaCluster)):
     for y in range(x+1,len(listaCluster)):
       aux = distance.euclidean(listaCluster[x],listaCluster[y])
-      if aux > distMin:
+      if distMin == None:
         distMin = aux
+      else: 
+        distMin = theFunc(aux, distMin)
   return distMin
 
 def getAverageDistance(centroid, cluster):
@@ -143,10 +147,8 @@ def prueba():
     distancias.append( [i]+getStats(listDistancias))
     distanciaNorm = getMeanWeight(listDistancias, [len(x) for x in clusters], len(aux))
     distanciasNorm.append(distanciaNorm)
-    if i == 5:
-      print '===>', listDistancias.index(max(listDistancias))
-      print max(listDistancias)
-      print clusters[listDistancias.index(max(listDistancias))]
+    
+    ### print i,'===>', listRadios     ### Indica el numero de clusters y el radio maximo (entre el centro y la instancia mas alejada)
 
 
   fig, ax = plt.subplots()
