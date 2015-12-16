@@ -44,7 +44,7 @@ def recalcular_centroides(newListCluster,centroides):
 
 def getCentroids(k, instancias):
   listaCentroids = [instancias[0]]
-  for i in range(0,k):
+  for i in range(0,k-1):
     listaDistancias = []
     for ins in instancias:
       listaDistancias.append(getDist(ins,listaCentroids))
@@ -58,19 +58,23 @@ def getDist(i1, lista_ins):
     dist+=distance.euclidean(i1,ins)
   return dist
 
+### Devuelve el elemento del cluster "theList" que tiene la distancia maxima/minima (theFunc) al centro "target"
 def getMinMaxToTarget(target, theList, theFunc = min):
   listDistances = []
   for elem in theList:
     listDistances.append(distance.euclidean(target,elem))
   return listDistances.index(theFunc(listDistances))
 
+### Devuelve la distancia maxima/minima (theFunc) que existe entre todos los elementos del cluster
 def getMinMaxDistFromList(listaCluster, theFunc = max):
-  distMin = -1.0
+  distMin = None
   for x in range(0,len(listaCluster)):
     for y in range(x+1,len(listaCluster)):
       aux = distance.euclidean(listaCluster[x],listaCluster[y])
-      if aux > distMin:
+      if distMin == None:
         distMin = aux
+      else: 
+        distMin = theFunc(aux, distMin)
   return distMin
 
 def getAverageDistance(centroid, cluster):
@@ -112,6 +116,7 @@ def getDistancias(clusters, centroids):
 def getStats(lista):
   return [ np.mean(lista)-np.std(lista), np.mean(lista)+np.std(lista), min(lista), max(lista) ]
 
+### Media ponderada segun el numero de instancias presentes en el cluster
 def getMeanWeight(listaRadios, listaPesos, total):
   auxSum = 0.0
   for rad, weight in zip(listaRadios, listaPesos):
@@ -131,7 +136,7 @@ def prueba():
     (clusters, centroids) = kmeans(i,aux)
     listRadios     = getRadios(clusters, centroids)
     radios.append(     [i]+getStats(listRadios))
-    radioNorm = getMeanWeight(listRadios, [len(x) for x in clusters], len(aux))
+    radioNorm = getMeanWeight(listRadios, [len(x) for x in clusters], len(aux)) 
     radiosNorm.append(radioNorm)
 
     listDiametros  = getDiametros(clusters)
@@ -143,16 +148,15 @@ def prueba():
     distancias.append( [i]+getStats(listDistancias))
     distanciaNorm = getMeanWeight(listDistancias, [len(x) for x in clusters], len(aux))
     distanciasNorm.append(distanciaNorm)
-    if i == 5:
-      print '===>', listDistancias.index(max(listDistancias))
-      print max(listDistancias)
-      print clusters[listDistancias.index(max(listDistancias))]
+    
+    ### print i,'===>', listRadios     ### Indica el numero de clusters y el radio maximo (entre el centro y la instancia mas alejada)
 
 
   fig, ax = plt.subplots()
   fig.subplots_adjust(bottom=0.2)
   candlestick(ax, radios, width=0.2, alpha=0.5)
-  plt.plot(radiosNorm)
+  ### Lista de medias normalizadas de radios con rango (2,20), linea azul del grafico.
+  plt.plot(radiosNorm)               
   plt.axhline(0, color='red')
   plt.savefig('Radios.png')
 
