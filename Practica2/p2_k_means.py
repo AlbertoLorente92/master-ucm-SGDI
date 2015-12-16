@@ -116,6 +116,7 @@ def getDistancias(clusters, centroids):
 def getStats(lista):
   return [ np.mean(lista)-np.std(lista), np.mean(lista)+np.std(lista), min(lista), max(lista) ]
 
+### Media ponderada segun el numero de instancias presentes en el cluster
 def getMeanWeight(listaRadios, listaPesos, total):
   auxSum = 0.0
   for rad, weight in zip(listaRadios, listaPesos):
@@ -135,7 +136,7 @@ def prueba():
     (clusters, centroids) = kmeans(i,aux)
     listRadios     = getRadios(clusters, centroids)
     radios.append(     [i]+getStats(listRadios))
-    radioNorm = getMeanWeight(listRadios, [len(x) for x in clusters], len(aux))
+    radioNorm = getMeanWeight(listRadios, [len(x) for x in clusters], len(aux)) 
     radiosNorm.append(radioNorm)
 
     listDiametros  = getDiametros(clusters)
@@ -154,7 +155,8 @@ def prueba():
   fig, ax = plt.subplots()
   fig.subplots_adjust(bottom=0.2)
   candlestick(ax, radios, width=0.2, alpha=0.5)
-  plt.plot(radiosNorm)
+  ### Lista de medias normalizadas de radios con rango (2,20), linea azul del grafico.
+  plt.plot(radiosNorm)               
   plt.axhline(0, color='red')
   plt.savefig('Radios.png')
 
