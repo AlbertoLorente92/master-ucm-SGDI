@@ -27,11 +27,15 @@ def knn(k, i, c):
     return 'Tipos incopatibles.'
 
   # Guardamos tuplas de (clase, distancia) entre 'i' y c[0...n].
-  # Luego lo ordenamos por la distancia y cogemos los k primeros.
+  # Luego las ordenamos por la distancia y cogemos las k primeras.
   dist_min = sorted([(c[y][-1], distancia(i,c[y])) for y in range(0,len(c)-1)], key=lambda tup: tup[1])[:k]
   clases = Counter([x[0] for x in dist_min])
   return max(clases, key=clases.get)
 
+# Para cada entrada en el test utilizamos knn.
+# Despues comparamos la clase predicha con la real.
+# Finalemnte devolvemos la proporcion de entardas clasificadas
+# correctamente.
 def test(k, trainset, testset):
   aux = []
   for test in testset:
