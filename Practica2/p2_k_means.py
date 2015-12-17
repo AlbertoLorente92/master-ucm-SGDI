@@ -114,7 +114,7 @@ def getDistancias(clusters, centroids):
   return listaDistancias
 
 def getStats(lista):
-  return [ np.mean(lista)-np.std(lista), np.mean(lista)+np.std(lista), min(lista), max(lista) ]
+  return [ 0, 0, min(lista), max(lista) ]
 
 ### Media ponderada segun el numero de instancias presentes en el cluster
 def getMeanWeight(listaRadios, listaPesos, total):
@@ -152,26 +152,30 @@ def prueba():
     ### print i,'===>', listRadios     ### Indica el numero de clusters y el radio maximo (entre el centro y la instancia mas alejada)
 
 
+
   fig, ax = plt.subplots()
   fig.subplots_adjust(bottom=0.2)
   candlestick(ax, radios, width=0.2, alpha=0.5)
   ### Lista de medias normalizadas de radios con rango (2,20), linea azul del grafico.
+  axes = plt.gca()
+  axes.set_xlim([0,20])
   plt.plot(radiosNorm)               
-  plt.axhline(0, color='red')
   plt.savefig('Radios.png')
 
   fig, ax = plt.subplots()
   fig.subplots_adjust(bottom=0.2)
   candlestick(ax, diametros, width=0.2, alpha=0.5)
+  axes = plt.gca()
+  axes.set_xlim([0,20])
   plt.plot(diametrosNorm)
-  plt.axhline(0, color='red')
   plt.savefig('Diametros.png')
 
   fig, ax = plt.subplots()
   fig.subplots_adjust(bottom=0.2)
   candlestick(ax, distancias, width=0.2, alpha=0.5)
+  axes = plt.gca()
+  axes.set_xlim([0,20])
   plt.plot(distanciasNorm)
-  plt.axhline(0, color='red')
   plt.savefig('Distancia.png')
 
 prueba()
