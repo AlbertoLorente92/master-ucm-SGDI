@@ -52,7 +52,7 @@ class MRWordCount(MRJob):
     # Volvemos a coger los 10 primeros.
     dist_min = sorted(values, key=lambda tup: tup[1])[:self.k]
     aux=Counter([x[0] for x in dist_min])
-    # Devolvemos la entrada de test con su clase más probable.
+    # Devolvemos la entrada de test con su clase mas probable.
     yield (key, max(aux, key=aux.get))
     
 curr_path = os.getcwd()
