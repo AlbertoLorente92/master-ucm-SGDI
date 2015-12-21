@@ -70,12 +70,16 @@ def getSubConjunto(attrIndex, attrVal, tList, inv=False):
 def removeCoveredIns(pairList, inst):
   leftOvers = []
   for pairAV in pairList:
-    leftOvers = getSubConjunto(pairAV[0], pairAV[2], inst, inv=True)
-    inst      = getSubConjunto(pairAV[0], pairAV[2], inst)
+    leftOvers += getSubConjunto(pairAV[0], pairAV[2], inst, inv=True)
+    inst       = getSubConjunto(pairAV[0], pairAV[2], inst)
   return leftOvers
  
 def prueba():
-  inst, attr_dic, classes = read_file('car.csv')
+  print 'INTERESANTE : _________________________________________________________ '
+  print '  http://www.csee.wvu.edu/~timm/cs591o/old/Rules.html'
+  print '  aux.csv es sacado del ejemplo.'
+  print 
+  inst, attr_dic, classes = read_file('aux.csv')
   prism_pro (inst, attr_dic, classes)
   #print json.dumps(arbol, indent=4)
   #write_dot_tree(arbol, 'aux.dot')
