@@ -1,0 +1,22 @@
+Este es el articulo del tio/tia que invento el PRISM. Esta muy bien, es fácil de leer 
+y explica cosas interesantes.
+        http://sci2s.ugr.es/keel/pdf/algorithm/articulo/1987-Cendrowska-IJMMS.pdf
+
+
+Esta página ha ayudado a implementar el algoritmo. Después cuenta cosas, pero no me
+entero. La mayoria son de problemas y posibles mejoras, pero tán solo las nombra,
+poer lo que no es muy útil
+        http://www.csee.wvu.edu/~timm/cs591o/old/Rules.html
+
+
+El libro que vamos a citar todos. Está bien porque explica las cosas en profundidad.
+También se mete en posibles mejoras. También lo que hay antes(el resto del capítulo),
+11 parece interesante.
+        https://books.google.es/books?id=Bbw_AAAAQBAJ&pg=PA164&lpg=PA164&dq=prism+rule+algorithm&source=bl&ots=lKJqYAUYn3&sig=lQ-xY--iJD6UIu3l_u1pxDbuPKw&hl=es&sa=X&sqi=2&ved=0ahUKEwi_zq_---zJAhVBCBoKHYZ0AhUQ6AEITTAF#v=onepage&q=prism%20rule%20algorithm&f=false
+
+
+Meh. Estio tio usa PRISM para clasificar cosas y después discute los resultados, no
+hace gran cosa. Es fácil de entender. Habla de cosas como, que pasa cuando el 
+conjunto de entrenamiento en pequeño(no completo), o que pasa al tener ruido en
+el conjunto de entrenamineto:
+        http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.556.7902&rep=rep1&type=pdf
