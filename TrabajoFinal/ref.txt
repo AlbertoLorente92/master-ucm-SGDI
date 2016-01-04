@@ -20,3 +20,8 @@ hace gran cosa. Es fácil de entender. Habla de cosas como, que pasa cuando el
 conjunto de entrenamiento en pequeño(no completo), o que pasa al tener ruido en
 el conjunto de entrenamineto:
         http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.556.7902&rep=rep1&type=pdf
+        
+Esto es lo único interesante que he encontrado por ahora. Describe PRISM y 1R que también es un algoritmo de 
+clasificación que genera reglas. Quiza deberíamos comentarlo. También despues compara tiempo/registros entre
+Weka y PostgreSQL:
+        http://www.scielo.br/scielo.php?pid=S1807-17752013000200389&script=sci_arttext&tlng=pt
