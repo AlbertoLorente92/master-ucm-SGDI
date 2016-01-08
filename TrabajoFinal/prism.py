@@ -1,10 +1,6 @@
 import csv
-from scipy.spatial import distance
-import numpy as np
-import math
+import sys
 from collections import Counter
-import json
-import time
 
 def read_file(filename):
   infile = open(filename, 'r')
@@ -21,7 +17,7 @@ def read_file(filename):
   return (inst,attrib_dic,classes)
 
 # Algoritmo prism
-def prism_pro(inst, attr_dic, classes):
+def prism_outer(inst, attr_dic, classes):
   rules = []
   for cl in classes:
     conj = [x for x in inst]
@@ -34,11 +30,11 @@ def prism_pro(inst, attr_dic, classes):
   return rules
 
 def prism_inner(inst, attr_dic, cl):
-  if len(set([x[-1] for x in inst])) == 1:
+  cls = [x[-1] for x in inst]
+  if len(set(cls)) == 1:
     return []
   if len(attr_dic) == 0:
-    aux = [x[-1] for x in inst].count(cl) / float(len([x[-1] for x in inst]))
-    print [x[-1] for x in inst].count(cl), len([x[-1] for x in inst])
+    aux = cls.count(cl) / float(len(cls))
     return [(-1, '__Clash__', str(aux))]
   pairList = []
   attr = select_pairAV(attr_dic, inst, cl)
@@ -59,7 +55,6 @@ def entrPairAV(pairAV, tList, cl):
   subConj = getSubConjunto(pairAV[0], pairAV[2], tList)
   if len(subConj) == 0 :
     return None
-  #print entr([x[-1] for x in subConj], cl), pairAV[2]
   return entr([x[-1] for x in subConj], cl)
 
 def select_pairAV(attrDict, tList, cl):
@@ -81,20 +76,7 @@ def removeCoveredIns(pairList, inst):
     leftOvers += getSubConjunto(pairAV[0], pairAV[2], inst, inv=True)
     inst       = getSubConjunto(pairAV[0], pairAV[2], inst)
   return leftOvers
- 
-def prueba():
-  inst, attr_dic, classes = read_file('aux.csv')
-  rules = prism_pro (inst, attr_dic, classes)
-  aux_method(rules)
-  #print json.dumps(rules, indent=4)
-  #write_dot_tree(rules, 'aux.dot')
 
-
-def aux_method(rules):
-  for rule in rules:
-    print rule
-  tree = create_tree_from_rules(rules)
-  write_dot_tree(tree, rules, 'out_prism.dot')
 
 def create_tree_from_rules(rules):
   arbol = {'nombre': 'datos', 'hijos':{}}
@@ -120,16 +102,13 @@ def most_repeating_condition(rules):
   attr = max(attr, key=attr.get)
   return attr
 
-
 def get_rules_have_condition(rules, condition, inverted=False):
   if inverted:
     return [x for x in rules if condition not in x[0]]
   return [x for x in rules if condition in x[0]]
 
-
 def remove_condition(rules, condition):
   return [ [ [y for y in x[0] if y != condition], x[1]] for x in rules]
-
 
 def getDot(tDict, count = [0]):
   out = ''
@@ -155,4 +134,11 @@ def write_dot_tree(id3_tree, rules, filename):
   fd.write(to_write)
   fd.close()
 
-prueba()
+if __name__=='__main__':
+  file_name = sys.argv[1]
+  inst, attr_dic, classes = read_file(file_name)
+  rules = prism_outer (inst, attr_dic, classes)
+  for rule in rules:
+    print rule
+  tree = create_tree_from_rules(rules)
+  write_dot_tree(tree, rules, 'out_prism.dot')

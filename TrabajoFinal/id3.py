@@ -1,9 +1,7 @@
 import csv
-from scipy.spatial import distance
-import numpy as np
+import sys
 import math
 from collections import Counter
-import json
 
 def read_file(filename):
   infile = open(filename, 'r')
@@ -69,12 +67,6 @@ def selecciona_atributo(attrDict, tList):
 def getSubConjunto(attrIndex, attrVal, tList):
   return [x for x in tList if x[attrIndex] == attrVal]
  
-def prueba():
-  inst,attrib_dic,classes = read_file('aux.csv')
-  arbol = id3(inst, attrib_dic, classes, attrib_dic)
-  #print json.dumps(arbol, indent=4)
-  write_dot_tree(arbol, 'out_id3.dot')
-
 def write_dot_tree(id3_tree, filename):
   to_write = 'digraph graphname {\n'
   to_write += getDot(id3_tree)
@@ -97,4 +89,8 @@ def getDot(tDict, count = [0]):
       out += '{} -> {} [ label="{}" ];\n'.format(tDict['nombre'], hijoV['nombre'], hijoK )
   return out
 
-prueba()
+if __name__=='__main__':
+  file_name = sys.argv[1]
+  inst,attrib_dic,classes = read_file(file_name)
+  arbol = id3(inst, attrib_dic, classes, attrib_dic)
+  write_dot_tree(arbol, 'out_id3.dot')
