@@ -22,14 +22,16 @@ def read_file(filename):
 
 # Algoritmo prism
 def prism_pro(inst, attr_dic, classes):
+  rules = []
   for cl in classes:
     conj = [x for x in inst]
     while True:
       if not cl in [x[-1] for x in conj]:
         break
       rule = prism_inner(conj, attr_dic, cl)
-      print rule, '--------->', cl
+      rules.append([rule, cl])
       conj = removeCoveredIns(rule, conj)
+  return rules
 
 def prism_inner(inst, attr_dic, cl):
   if len(set([x[-1] for x in inst])) == 1:
@@ -75,35 +77,76 @@ def removeCoveredIns(pairList, inst):
   return leftOvers
  
 def prueba():
-  print 'INTERESANTE : _________________________________________________________ '
-  print '  http://www.csee.wvu.edu/~timm/cs591o/old/Rules.html'
-  print '  aux.csv es sacado del ejemplo.'
-  print 
   inst, attr_dic, classes = read_file('aux.csv')
-  prism_pro (inst, attr_dic, classes)
-  #print json.dumps(arbol, indent=4)
-  #write_dot_tree(arbol, 'aux.dot')
+  rules = prism_pro (inst, attr_dic, classes)
+  aux_method(rules)
+  #print json.dumps(rules, indent=4)
+  #write_dot_tree(rules, 'aux.dot')
 
-def write_dot_tree(id3_tree, filename):
-  to_write = 'digraph graphname {\n'
-  to_write += getDot(id3_tree)
-  to_write += '}\n'
-  fd = open(filename, 'w')
-  fd.write(to_write)
-  fd.close()
 
-# Devuelve un string que define el arbol formado por
-# el algoritmo id3.
+def aux_method(rules):
+  for rule in rules:
+    print rule
+  tree = create_tree_from_rules(rules)
+  write_dot_tree(tree, rules, 'out_prism.dot')
+
+def create_tree_from_rules(rules):
+  arbol = {'nombre': 'datos', 'hijos':{}}
+  for rule in rules:
+    if len(rule[0]) == 1:
+      cond_str  = '' + rule[0][0][1] + '\n' + rule[0][0][2] 
+      arbol['hijos'][cond_str] = {'nombre' : rule[1]}
+  rules = [x for x in rules if len(x[0]) > 1 ]
+
+  while( len(rules) > 0 ):
+    cond      = most_repeating_condition(rules)
+    cond_str  = '' + cond[1] + '\n' + cond[2] 
+    rules_a   = get_rules_have_condition(rules, cond)
+    rules_a   = remove_condition(rules_a, cond)
+    rules     = get_rules_have_condition(rules, cond, inverted=True)
+    arbol['hijos'][cond_str] = create_tree_from_rules(rules_a)
+
+  return arbol
+
+def most_repeating_condition(rules):
+  conditions = [y for x in rules for y in x[0]]
+  attr = Counter(conditions)
+  attr = max(attr, key=attr.get)
+  return attr
+
+
+def get_rules_have_condition(rules, condition, inverted=False):
+  if inverted:
+    return [x for x in rules if condition not in x[0]]
+  return [x for x in rules if condition in x[0]]
+
+
+def remove_condition(rules, condition):
+  return [ [ [y for y in x[0] if y != condition], x[1]] for x in rules]
+
+
 def getDot(tDict, count = [0]):
   out = ''
   nombreOld = tDict['nombre'] 
   tDict['nombre'] += `count[0]`
   count[0] += 1
-  out += '{} [label="{}"];\n'.format(tDict['nombre'], nombreOld )
+  if 'hijos' in tDict:
+    out += '{} [shape=box, label="", width=.1];\n'.format(tDict['nombre'], nombreOld )
+  else:
+    out += '{} [label="{}", width=.0];\n'.format(tDict['nombre'], nombreOld )
   if 'hijos' in tDict:
     for hijoK, hijoV in tDict['hijos'].iteritems():
       out += getDot(hijoV, count=count)
       out += '{} -> {} [ label="{}" ];\n'.format(tDict['nombre'], hijoV['nombre'], hijoK )
   return out
+
+def write_dot_tree(id3_tree, rules, filename):
+  to_write = 'digraph graphname {\n'
+  to_write += 'rankdir="LR";'
+  to_write += getDot(id3_tree)
+  to_write += '}\n'
+  fd = open(filename, 'w')
+  fd.write(to_write)
+  fd.close()
 
 prueba()
