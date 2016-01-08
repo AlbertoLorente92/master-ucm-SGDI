@@ -16,32 +16,60 @@ def read_file(filename):
   classes =list(set([x[-1] for x in lista[1:]]))
   return (inst,attrib_dic,classes)
 
-# Algoritmo prism
+"""
+Parameters:
+  inst:     Lista con las instancias.
+  attr_dic: Diccionario con los valores de cada atributo.
+  classes:  Lista de las posibles calses.
+Comments:
+  1. Generamos reglas para cada clase, 'cl', en 'classes'.
+  2. Epezamos haciendo una copia de las intancias.
+  3. Dejamos de generar reglas para la clase 'cl'
+     al llegar a un 'conj' sin instancia de la clase.
+  4. Invocamos a 'prism_inner' que genera una regla.
+  5. Guardamos esa regla
+  6. Eliminamos todas las intancias cubiertas por la nueva regla."""
 def prism_outer(inst, attr_dic, classes):
   rules = []
-  for cl in classes:
-    conj = [x for x in inst]
-    while True:
-      if not cl in [x[-1] for x in conj]:
-        break
-      rule = prism_inner(conj, attr_dic, cl)
-      rules.append([rule, cl])
-      conj = removeCoveredIns(rule, conj)
+  for cl in classes:                            #1
+    conj = [x for x in inst]                    #2
+    while cl in [x[-1] for x in conj]:          #3
+      rule = prism_inner(conj, attr_dic, cl)    #4
+      rules.append([rule, cl])                  #5
+      conj = removeCoveredIns(rule, conj)       #6
   return rules
 
+"""
+Parameters:
+  inst:     Lista con las instancias.
+  attr_dic: Diccionario con los valores de cada atributo.
+  cl:       Clase sobre la que generar la regla.
+Comments:
+  1. Generamos una lista con todas las clases en 'inst'.
+  2. Si todas las instancias son de la clase 'cl', 
+     la regla esta completa. No es necesario generar mas
+     condiciones.
+  3. Si la lista de atributos esta vacia, pero tenemos
+     instancias de clases diferentes, tenemos un clash.
+  4. Selecionamos el par (atributo, valor) con mayor ganacia.
+  5. Obtenemos las instancias que cumplen 'attr_val'.
+  6. Invocamos de forma recursiva este metodo. De esta menera
+     este metodo se repitira hasta que el #2 sea cierto. 
+  7. Finalmente devolvemos la regla generada. """
 def prism_inner(inst, attr_dic, cl):
-  cls = [x[-1] for x in inst]
-  if len(set(cls)) == 1:
+  cls = [x[-1] for x in inst]                       #1
+  if len(set(cls)) == 1:                            #2
     return []
-  if len(attr_dic) == 0:
+  if len(attr_dic) == 0:                            #3
     aux = cls.count(cl) / float(len(cls))
     return [(-1, '__Clash__', str(aux))]
   pairList = []
-  attr = select_pairAV(attr_dic, inst, cl)
-  pairList.append(attr)
-  subSet = getSubSet(attr[0], attr[2], inst)
-  pairList += prism_inner(subSet, [x for x in attr_dic if x[0]!=attr[0]], cl)
-  return pairList
+  attr_val = select_pairAV(attr_dic, inst, cl)      #4
+  pairList.append(attr_val)
+  subSet = getSubSet(attr_val[0], attr_val[2], inst)#5
+  attr_dic = [x for x in attr_dic if x[0]!=attr_val[0]]
+  pairList += prism_inner(subSet, attr_dic, cl)     #6
+  return pairList                                   #7
   
 def inf(tList, cl):
   tLen = float(len(tList))
