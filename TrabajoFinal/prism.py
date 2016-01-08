@@ -35,12 +35,16 @@ def prism_pro(inst, attr_dic, classes):
 
 def prism_inner(inst, attr_dic, cl):
   if len(set([x[-1] for x in inst])) == 1:
-      return []
+    return []
+  if len(attr_dic) == 0:
+    aux = [x[-1] for x in inst].count(cl) / float(len([x[-1] for x in inst]))
+    print [x[-1] for x in inst].count(cl), len([x[-1] for x in inst])
+    return [(-1, '__Clash__', str(aux))]
   pairList = []
   attr = select_pairAV(attr_dic, inst, cl)
   pairList.append(attr)
   subConj = getSubConjunto(attr[0], attr[2], inst)
-  pairList += prism_inner(subConj, [x for x in attr_dic if x!=attr], cl)
+  pairList += prism_inner(subConj, [x for x in attr_dic if x[0]!=attr[0]], cl)
   return pairList
   
 # Calcula la entropia de una lista.
@@ -72,6 +76,8 @@ def getSubConjunto(attrIndex, attrVal, tList, inv=False):
 def removeCoveredIns(pairList, inst):
   leftOvers = []
   for pairAV in pairList:
+    if pairAV[1] == '__Clash__':
+      continue
     leftOvers += getSubConjunto(pairAV[0], pairAV[2], inst, inv=True)
     inst       = getSubConjunto(pairAV[0], pairAV[2], inst)
   return leftOvers
