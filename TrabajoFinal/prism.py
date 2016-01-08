@@ -20,15 +20,15 @@ def read_file(filename):
 Parameters:
   inst:     Lista con las instancias.
   attr_dic: Diccionario con los valores de cada atributo.
-  classes:  Lista de las posibles calses.
+  classes:  Lista de las posibles clases.
 Comments:
   1. Generamos reglas para cada clase, 'cl', en 'classes'.
-  2. Epezamos haciendo una copia de las intancias.
+  2. Empezamos haciendo una copia de las instancias.
   3. Dejamos de generar reglas para la clase 'cl'
      al llegar a un 'conj' sin instancia de la clase.
   4. Invocamos a 'prism_inner' que genera una regla.
   5. Guardamos esa regla
-  6. Eliminamos todas las intancias cubiertas por la nueva regla."""
+  6. Eliminamos todas las instancias cubiertas por la nueva regla."""
 def prism_outer(inst, attr_dic, classes):
   rules = []
   for cl in classes:                            #1
@@ -51,10 +51,10 @@ Comments:
      condiciones.
   3. Si la lista de atributos esta vacia, pero tenemos
      instancias de clases diferentes, tenemos un clash.
-  4. Selecionamos el par (atributo, valor) con mayor ganacia.
+  4. Seleccionamos el par (atributo, valor) con mayor ganancia.
   5. Obtenemos las instancias que cumplen 'attr_val'.
-  6. Invocamos de forma recursiva este metodo. De esta menera
-     este metodo se repitira hasta que el #2 sea cierto. 
+  6. Invocamos de forma recursiva este metodo. De esta manera
+     este metodo se repetira hasta que el #2 sea cierto. 
   7. Finalmente devolvemos la regla generada. """
 def prism_inner(inst, attr_dic, cl):
   cls = [x[-1] for x in inst]                       #1
