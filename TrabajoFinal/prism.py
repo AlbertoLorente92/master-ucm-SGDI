@@ -39,31 +39,30 @@ def prism_inner(inst, attr_dic, cl):
   pairList = []
   attr = select_pairAV(attr_dic, inst, cl)
   pairList.append(attr)
-  subConj = getSubConjunto(attr[0], attr[2], inst)
-  pairList += prism_inner(subConj, [x for x in attr_dic if x[0]!=attr[0]], cl)
+  subSet = getSubSet(attr[0], attr[2], inst)
+  pairList += prism_inner(subSet, [x for x in attr_dic if x[0]!=attr[0]], cl)
   return pairList
   
-# Calcula la entropia de una lista.
-def entr(tList, cl):
+def inf(tList, cl):
   tLen = float(len(tList))
   aux = Counter(tList)
   entr = aux[cl]/tLen
   return entr, tLen
 
-def entrPairAV(pairAV, tList, cl):
+def inf_gainPairAV(pairAV, tList, cl):
   lenList = len(tList)
-  subConj = getSubConjunto(pairAV[0], pairAV[2], tList)
+  subConj = getSubSet(pairAV[0], pairAV[2], tList)
   if len(subConj) == 0 :
     return None
-  return entr([x[-1] for x in subConj], cl)
+  return inf([x[-1] for x in subConj], cl)
 
 def select_pairAV(attrDict, tList, cl):
   listEntr = {}
   for pairAV in attrDict:
-    listEntr[ pairAV ] = entrPairAV(pairAV, tList, cl)
+    listEntr[ pairAV ] = inf_gainPairAV(pairAV, tList, cl)
   return max(listEntr, key=listEntr.get)
   
-def getSubConjunto(attrIndex, attrVal, tList, inv=False):
+def getSubSet(attrIndex, attrVal, tList, inv=False):
   if not inv:
     return [x for x in tList if x[attrIndex] == attrVal]
   return [x for x in tList if x[attrIndex] != attrVal]
@@ -73,8 +72,8 @@ def removeCoveredIns(pairList, inst):
   for pairAV in pairList:
     if pairAV[1] == '__Clash__':
       continue
-    leftOvers += getSubConjunto(pairAV[0], pairAV[2], inst, inv=True)
-    inst       = getSubConjunto(pairAV[0], pairAV[2], inst)
+    leftOvers += getSubSet(pairAV[0], pairAV[2], inst, inv=True)
+    inst       = getSubSet(pairAV[0], pairAV[2], inst)
   return leftOvers
 
 
