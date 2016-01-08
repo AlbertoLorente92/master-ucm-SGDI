@@ -25,3 +25,6 @@ Esto es lo único interesante que he encontrado por ahora. Describe PRISM y 1R q
 clasificación que genera reglas. Quiza deberíamos comentarlo. También despues compara tiempo/registros entre
 Weka y PostgreSQL:
         http://www.scielo.br/scielo.php?pid=S1807-17752013000200389&script=sci_arttext&tlng=pt
+
+1R explicado de forma sencilla y con un ejemplo. Es un algoritmo que crea reglas muy rapido y no tiene un mal porcentaje de acierto:
+        http://www.saedsayad.com/oner.htm
