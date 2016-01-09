@@ -62,7 +62,7 @@ def prism_inner(inst, attr_dic, cl):
     return []
   if len(attr_dic) == 0:                            #3
     aux = cls.count(cl) / float(len(cls))
-    return [(-1, '__Clash__', str(aux))]
+    return [(-1, '__Clash__', str(round(aux,2)))]
   pairList = []
   attr_val = select_pairAV(attr_dic, inst, cl)      #4
   pairList.append(attr_val)
