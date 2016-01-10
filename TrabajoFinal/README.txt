@@ -10,7 +10,7 @@ El código fuente podemos encontrar en los archivos:
   prism.py
   id3.py
 
-Los archivo, que contienen los cunjuntos de entrenamiento utilizados en la
+Los archivo, que contienen los conjuntos de entrenamiento utilizados en la
 presentación son los siguientes:
   id3_problem.csv
   incomplete.csv
