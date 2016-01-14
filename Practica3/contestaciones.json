@@ -1,6 +1,6 @@
 [
 	{
-		"_id": "001",
+		"_id": 1,
 		"fecha": "02-01-2016",
 		"texto": "Before ask something like this first look for some doc. Start in here url",
 		"valoracion": "mala",
@@ -21,7 +21,7 @@
 	}
 	,
 	{
-		"_id": "002",
+		"_id": 2,
 		"fecha": "05-01-2016",
 		"texto": "For doing that u need to do bla bla bla...",
 		"valoracion": "buena",
@@ -36,7 +36,7 @@
 	}
 	,
 	{
-		"_id": "003",
+		"_id": 3,
 		"fecha": "16-12-2016",
 		"texto": "For make that you could use the '[]' sign",
 		"valoracion": "buena",
@@ -51,7 +51,7 @@
 	}
 	,
 	{
-		"_id": "004",
+		"_id": 4,
 		"fecha": "24-11-2015",
 		"texto": "You coudl go to the page url and download the package from there",
 		"valoracion": "mala",
@@ -71,7 +71,7 @@
 	}
 	,
 	{
-		"_id": "005",
+		"_id": 5,
 		"fecha": "27-11-2015",
 		"texto": "Depending of the version that you need you may use this or that",
 		"valoracion": "buena",

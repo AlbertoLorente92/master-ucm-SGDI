@@ -1,6 +1,6 @@
 [
 	{
-		"_id": "001",
+		"_id": 1,
 		"titulo": "How can i use mapreduce in mongodb?",
 		"tags": ["mongodb","mapreduce"],
 		"fecha": "01-01-2016",
@@ -9,7 +9,7 @@
 	}
 	,
 	{
-		"_id": "002",
+		"_id": 2,
 		"titulo": "How can i make a list of items in JSON?",
 		"tags": ["json"],
 		"fecha": "15-12-2016",
@@ -18,7 +18,7 @@
 	}
 	,
 	{
-		"_id": "003",
+		"_id": 3,
 		"titulo": "How do i install fortran in ubuntu?",
 		"tags": ["fortran","linux","consol"],
 		"fecha": "23-11-2015",
