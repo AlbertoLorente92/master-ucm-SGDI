@@ -1,0 +1,92 @@
+[
+	{
+		"idcontestacion": "001",
+		"fecha": "02-01-2016",
+		"texto": "Before ask something like this first look for some doc. Start in here url",
+		"valoracion": "mala",
+		"idusuario": "AlbertoLorente92",
+		"idpregunta": "001",
+		"comentario": [
+		{
+			"fecha": "03-01-2016",
+			"texto": "That must be the worst answer ever told in this forum",
+			"idusuario": "drmane"
+		},
+		{
+			"fecha": "04-01-2016",
+			"texto": "Theres no point to be that mean, if dont want to help just go away",
+			"idusuario": "linmdotor"
+		}
+		]
+	}
+	,
+	{
+		"idcontestacion": "002",
+		"fecha": "05-01-2016",
+		"texto": "For doing that u need to do bla bla bla...",
+		"valoracion": "buena",
+		"idusuario": "hristoivanov",
+		"idpregunta": "001",
+		"comentario": [{
+			"fecha": "06-01-2016",
+			"texto": "Thanks for that, i can finally make it!",
+			"idusuario": "linmdotor"
+		}
+		]
+	}
+	,
+	{
+		"idcontestacion": "003",
+		"fecha": "16-12-2016",
+		"texto": "For make that you could use the '[]' sign",
+		"valoracion": "buena",
+		"idusuario": "AlbertoLorente92",
+		"idpregunta": "002",
+		"comentario": [{
+			"fecha": "17-12-2016",
+			"texto": "And also dont forget to put ',' in between every item",
+			"idusuario": "hristoivanov"
+		}
+		]
+	}
+	,
+	{
+		"idcontestacion": "004",
+		"fecha": "24-11-2015",
+		"texto": "You coudl go to the page url and download the package from there",
+		"valoracion": "mala",
+		"idusuario": "linmdotor",
+		"idpregunta": "003",
+		"comentario": [{
+			"fecha": "25-11-2015",
+			"texto": "I'm asking how to do it through command console",
+			"idusuario": "drmane"
+		},
+		{
+			"fecha": "26-11-2015",
+			"texto": "Then you should said that",
+			"idusuario": "linmdotor"
+		}
+		]
+	}
+	,
+	{
+		"idcontestacion": "005",
+		"fecha": "27-11-2015",
+		"texto": "Depending of the version that you need you may use this or that",
+		"valoracion": "buena",
+		"idusuario": "hristoivanov",
+		"idpregunta": "003",
+		"comentario": [{
+			"fecha": "28-11-2015",
+			"texto": "Thank you man",
+			"idusuario": "drmane"
+		},
+		{
+			"fecha": "28-11-2015",
+			"texto": "Make sure you do apt-get update first",
+			"idusuario": "AlbertoLorente92"
+		}
+		]
+	}
+]
