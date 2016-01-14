@@ -1,26 +1,26 @@
 [
 	{
-		"idpregunta": "001",
+		"_id": "001",
 		"titulo": "How can i use mapreduce in mongodb?",
-		"tags": "",
+		"tags": ["mongodb","mapreduce"],
 		"fecha": "01-01-2016",
 		"texto": "I have to make a practice about it and i have no idea how to do it",
 		"idusuario": "linmdotor"
 	}
 	,
 	{
-		"idpregunta": "002",
+		"_id": "002",
 		"titulo": "How can i make a list of items in JSON?",
-		"tags": "",
+		"tags": ["json"],
 		"fecha": "15-12-2016",
 		"texto": "I want to know how can i list some 'tags' inside only one attribute on json",
 		"idusuario": "linmdotor"
 	}
 	,
 	{
-		"idpregunta": "003",
+		"_id": "003",
 		"titulo": "How do i install fortran in ubuntu?",
-		"tags": "",
+		"tags": ["fortran","linux","consol"],
 		"fecha": "23-11-2015",
 		"texto": "sudo apt-getinstall gfortran didnt work",
 		"idusuario": "drmane"

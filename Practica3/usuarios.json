@@ -1,9 +1,9 @@
 [
 	{
-		"alias": "hristoivanov",
+		"_id": "hristoivanov",
 		"nombre": "hristo",
 		"apellidos": "ivanov ivanov",
-		"experiencia": "",
+		"experiencia": ["python","java"],
 		"fecha": "14-03-2014",
 		"direccion": {
 			"pais": "spain",
@@ -13,10 +13,10 @@
 	}
 	,
 	{
-		"alias": "AlbertoLorente92",
+		"_id": "AlbertoLorente92",
 		"nombre": "alberto",
 		"apellidos": "lorente sanchez",
-		"experiencia": "",
+		"experiencia": ["java","html"],
 		"fecha": "19-12-2012",
 		"direccion": {
 			"pais": "spain",
@@ -26,10 +26,10 @@
 	}
 	,
 	{
-		"alias": "drmane",
+		"_id": "drmane",
 		"nombre": "daniel",
 		"apellidos": "ruiz manero",
-		"experiencia": "",
+		"experiencia": ["c++"],
 		"fecha": "9-04-2013",
 		"direccion": {
 			"pais": "spain",
@@ -39,10 +39,10 @@
 	}
 	,
 	{
-		"alias": "linmdotor",
+		"_id": "linmdotor",
 		"nombre": "jesus",
 		"apellidos": "martinez dotor",
-		"experiencia": "",
+		"experiencia": ["php","javascript"],
 		"fecha": "25-2-2013",
 		"direccion": {
 			"pais": "spain",
