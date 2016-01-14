@@ -13,23 +13,47 @@ con otros ni haberlo obtenido de una fuente externa.
 #################################################################
 
 from pymongo import MongoClient
+import json
 
 client = MongoClient()
 db = client.pruebas
 
 # 1. Añadir un usuario
-def insert_user( user ):
-  db.usuarios.insert(user)  
-
+def insert_user(_id, nombre, apellidos, experiencia, fecha, direccion):
+  user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
+  if not user:
+    return json.dumps({'result' : 'Incomplete user.'})
+  # TODO try, catch  duplicate key error index
+  result = db.usuarios.insert_one(user)  
+  if result.acknowledged:
+    return json.dumps({'result' : result.inserted_id})
+  else:
+    return json.dumps({'result' : 'Not acknowledged insert.'})
 
 # 2. Actualizar un usuario
-def update_user():
-    pass
+def update_user(_id, nombre, apellidos, experiencia, fecha, direccion):
+  user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
+  if not user:
+    return json.dumps({'result' : 'Incomplete user.'})
+  # TODO try, catch posible errors
+  result = db.usuarios.replace_one({'_id':_id}, user)
+  if result.acknowledged:
+    return json.dumps({'result' : result.matched_count})
+  else:
+    return json.dumps({'result' : 'Not acknowledged insert.'})
 
 
 # 3. Añadir una pregunta
-def add_question():
-    pass
+def add_question( titulo, tags, fecha, texto, idusuario):
+  question = form_question( titulo, tags, fecha, texto, idusuario)
+  if not question:
+    return json.dumps({'result' : 'Incomplete question.'})
+  # TODO try, catch  duplicate key error index
+  result = db.preguntas.insert_one(question)  
+  if result.acknowledged:
+    return json.dumps({'result' : result.inserted_id})
+  else:
+    return json.dumps({'result' : 'Not acknowledged insert.'})
 
 
 # 4. Añadir una respuesta a una pregunta.
@@ -110,23 +134,77 @@ def get_questions_by_tag():
 ################################################################################
 
 # Incluir aqui el resto de funciones necesarias
+def form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion):
+  # Direccion debe tener los siguientes campos.
+  if not 'pais' in direccion or not 'cuidad' in direccion or not 'cp' in direccion:
+    return None
+  # Experiencia puede ser vacio: un novato que quiere aprender.
+  if not all([_id, nombre, apellidos, fecha]):
+    return None
+  user = 	{
+		"_id": _id,
+		"nombre": nombre,
+		"apellidos": apellidos,
+		"experiencia": experiencia,
+		"fecha": fecha,
+		"direccion": direccion,
+	}
+  return user
+
+def form_question( titulo, tags, fecha, texto, idusuario):
+  if not all([titulo, fecha, texto, idusuario]):
+    return None
+  question = {
+    "titulo": titulo    
+    "tags": tags,
+    "fecha": fecha,
+    "texto": texto,
+    "idusuario": idusuario,
+  }
+  return question
+
 
 
 ################################################################################
 ############################  TEST #############################################
 ################################################################################
 
-user_1 = 	{
-		"_id": "awesome_dude",
-		"nombre": "The Dude",
-		"apellidos": "Jeff 'The Dude' Letrotski",
-		"experiencia": ["python","orm"],
-		"fecha": "14-03-2014",
-		"direccion": {
-			"pais": "spain",
-			"ciudad": "madrid",
-			"cp": "28005"
-		}
-	}
 
-insert_user( user_1 )
+print insert_user( 
+  'awesome_dude',
+  'The Dude', 
+  'Jeff The Dude Letrotski',
+  ['python', 'orm'],
+  '14-03-2015',
+  {
+    'pais' : 'spain',
+    'cuidad' : 'madrid',
+    'cp' : '28005',
+  },
+  )
+
+print update_user( 
+  'awesome_dude',
+  'The Dude', 
+  'Jeff The Dude Letrotski',
+  ['python', 'orm', 'c++'],
+  '14-03-2016',
+  {
+    'pais' : 'spain',
+    'cuidad' : 'madrid',
+    'cp' : '28005',
+  },
+  )
+
+print insert_question( 
+  'How to ',
+  'The Dude', 
+  'Jeff The Dude Letrotski',
+  ['python', 'orm', 'c++'],
+  '14-03-2016',
+  {
+    'pais' : 'spain',
+    'cuidad' : 'madrid',
+    'cp' : '28005',
+  },
+  )
