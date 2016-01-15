@@ -57,9 +57,8 @@ def add_question( titulo, tags, fecha, texto, idusuario):
 
 
 # 4. Añadir una respuesta a una pregunta.
-def add_answer(fecha, texto, idusuario):
-  answer = form_answer(fecha, texto, idusuario)
-  print answer
+def add_answer(fecha, texto, idusuario, idpregunta):
+  answer = form_answer(fecha, texto, idusuario, idpregunta)
   if not answer:
       return json.dumps({'result' : 'Incomplete question.'})
   result =  db.contestaciones.insert_one(answer)
@@ -69,8 +68,9 @@ def add_answer(fecha, texto, idusuario):
     return json.dumps({'result' : 'Not acknowledged insert.'})
     
 # 5. Comentar una respuesta.
-def add_comment():
-    pass
+def add_comment(fecha, texto, idusuario, idcomentario):
+  comment = form_comment(fecha, texto, idusuario)
+  result = db.contestaciones.update({_id:idusuario},{$set:{comentario:comment}})
 
 
 # 6. Puntuar una respuesta.
@@ -170,19 +170,28 @@ def form_question(titulo, tags, fecha, texto, idusuario):
   }
   return question
 
-def form_answer(fecha, texto, idusuario):
+def form_answer(fecha, texto, idusuario, idpregunta):
   if not all([fecha, texto, idusuario]):
     return None
   respuesta = {
 		"fecha": fecha,
 		"texto": texto,
 		"idusuario": idusuario,
-    "idpregunta": '',
+    "idpregunta": idpregunta,
     "valoracion": '',
     "comentario": '',
   }
   return respuesta
 
+def form_comment(fecha, texto, idusuario):
+  if not all([fecha, texto, idusuario]):
+    return None
+  comment = {
+		"fecha": fecha,
+		"texto": texto,
+		"idusuario": idusuario,
+  }
+  return comment
 ################################################################################
 ############################  TEST #############################################
 ################################################################################
