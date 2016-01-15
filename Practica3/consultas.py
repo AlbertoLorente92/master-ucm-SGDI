@@ -49,9 +49,9 @@ def add_question( titulo, tags, fecha, texto, idusuario):
   if not question:
     return json.dumps({'result' : 'Incomplete question.'})
   # TODO try, catch  duplicate key error index
-  result = db.preguntas.insert_one(question)  
+  result = db.preguntas.insert_one(question)
   if result.acknowledged:
-    return json.dumps({'result' : result.inserted_id})
+    return json.dumps({'result' : str(result.inserted_id)})
   else:
     return json.dumps({'result' : 'Not acknowledged insert.'})
 
@@ -155,7 +155,7 @@ def form_question( titulo, tags, fecha, texto, idusuario):
   if not all([titulo, fecha, texto, idusuario]):
     return None
   question = {
-    "titulo": titulo    
+    "titulo": titulo,    
     "tags": tags,
     "fecha": fecha,
     "texto": texto,
@@ -193,18 +193,13 @@ print update_user(
     'pais' : 'spain',
     'cuidad' : 'madrid',
     'cp' : '28005',
-  },
+  }
   )
 
-print insert_question( 
-  'How to ',
-  'The Dude', 
-  'Jeff The Dude Letrotski',
-  ['python', 'orm', 'c++'],
-  '14-03-2016',
-  {
-    'pais' : 'spain',
-    'cuidad' : 'madrid',
-    'cp' : '28005',
-  },
+print add_question( 
+  'Random Q',
+  ['random'],
+  '15-01-2016',
+  'Win or lose',
+  'AlbertoLorente92'
   )
