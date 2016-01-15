@@ -57,10 +57,17 @@ def add_question( titulo, tags, fecha, texto, idusuario):
 
 
 # 4. Añadir una respuesta a una pregunta.
-def add_answer():
-    pass
-
-
+def add_answer(fecha, texto, idusuario):
+  answer = form_answer(fecha, texto, idusuario)
+  print answer
+  if not answer:
+      return json.dumps({'result' : 'Incomplete question.'})
+  result =  db.contestaciones.insert_one(answer)
+  if result.acknowledged:
+    return json.dumps({'result' : str(result.inserted_id)})
+  else:
+    return json.dumps({'result' : 'Not acknowledged insert.'})
+    
 # 5. Comentar una respuesta.
 def add_comment():
     pass
@@ -151,7 +158,7 @@ def form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion):
 	}
   return user
 
-def form_question( titulo, tags, fecha, texto, idusuario):
+def form_question(titulo, tags, fecha, texto, idusuario):
   if not all([titulo, fecha, texto, idusuario]):
     return None
   question = {
@@ -163,13 +170,24 @@ def form_question( titulo, tags, fecha, texto, idusuario):
   }
   return question
 
-
+def form_answer(fecha, texto, idusuario):
+  if not all([fecha, texto, idusuario]):
+    return None
+  respuesta = {
+		"fecha": fecha,
+		"texto": texto,
+		"idusuario": idusuario,
+    "idpregunta": '',
+    "valoracion": '',
+    "comentario": '',
+  }
+  return respuesta
 
 ################################################################################
 ############################  TEST #############################################
 ################################################################################
 
-
+"""
 print insert_user( 
   'awesome_dude',
   'The Dude', 
@@ -203,3 +221,10 @@ print add_question(
   'Win or lose',
   'AlbertoLorente92'
   )
+"""
+
+print add_answer(
+  '15-15-15',
+  'Texto',
+  'AlbertoLorente92'
+)
