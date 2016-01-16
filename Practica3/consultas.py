@@ -60,7 +60,7 @@ def add_question( titulo, tags, fecha, texto, idusuario):
 def add_answer(fecha, texto, idusuario, idpregunta):
   answer = form_answer(fecha, texto, idusuario, idpregunta)
   if not answer:
-      return json.dumps({'result' : 'Incomplete question.'})
+      return json.dumps({'result' : 'Incomplete answer.'})
   result =  db.contestaciones.insert_one(answer)
   if result.acknowledged:
     return json.dumps({'result' : str(result.inserted_id)})
@@ -68,19 +68,41 @@ def add_answer(fecha, texto, idusuario, idpregunta):
     return json.dumps({'result' : 'Not acknowledged insert.'})
     
 # 5. Comentar una respuesta.
-def add_comment(fecha, texto, idusuario, idcomentario):
+def add_comment(fecha, texto, idusuario, idcontestacion):
   comment = form_comment(fecha, texto, idusuario)
-  result = db.contestaciones.update({_id:idusuario},{$set:{comentario:comment}})
+  if not answer:
+      return json.dumps({'result' : 'Incomplete comment.'})
+  # $push for lists and $addtoSet for Sets
+  result = db.contestaciones.update_one({'_id':idcontestacion},{'$addToSet' :{'comentario':comment}})
+  if result.acknowledged:
+    return json.dumps({'result' : result.matched_count})
+  else:
+    return json.dumps({'result' : 'Not acknowledged insert.'})
 
 
 # 6. Puntuar una respuesta.
-def score_answer():
-    pass
+def score_answer(fecha, nota, idusuario, idcontestacion):
+  score = form_score(fecha, nota, idusuario)
+  if not score:
+      return json.dumps({'result' : 'Incomplete comment.'})
+  result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion': { "$in": {'idusuario': idusuario} } },\
+                                        {'$addToSet' :{'valoracion':score}}, True)
+  if result.acknowledged:
+    return json.dumps({'result' : result.matched_count})
+  else:
+    return json.dumps({'result' : 'Not acknowledged insert.'})
 
 
 # 7. Modificar una puntuacion de buena a mala o viceversa.
-def update_score():
-    pass
+def update_score(fecha, nota, idusuario, idcontestacion):
+  score = form_score(fecha, nota, idusuario)
+  if not score:
+      return json.dumps({'result' : 'Incomplete comment.'})
+  result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario':idusuario},{'$set' :{'valoracion.$.nota':nota}})
+  if result.acknowledged:
+    return json.dumps({'result' : result.matched_count})
+  else:
+    return json.dumps({'result' : 'Not acknowledged insert.'})
 
 
 # 8. Borrar una pregunta junto con todas sus respuestas, comentarios y 
@@ -178,8 +200,8 @@ def form_answer(fecha, texto, idusuario, idpregunta):
 		"texto": texto,
 		"idusuario": idusuario,
     "idpregunta": idpregunta,
-    "valoracion": '',
-    "comentario": '',
+    "valoracion": [],
+    "comentario": [],
   }
   return respuesta
 
@@ -192,6 +214,16 @@ def form_comment(fecha, texto, idusuario):
 		"idusuario": idusuario,
   }
   return comment
+
+def form_score(fecha, nota, idusuario):
+  if not all([fecha, nota, idusuario]):
+    return None
+  score = {
+		"fecha": fecha,
+		"nota": nota,
+		"idusuario": idusuario,
+  }
+  return score
 ################################################################################
 ############################  TEST #############################################
 ################################################################################
@@ -230,10 +262,18 @@ print add_question(
   'Win or lose',
   'AlbertoLorente92'
   )
-"""
 
-print add_answer(
+print add_comment(
   '15-15-15',
   'Texto',
-  'AlbertoLorente92'
+  'AlbertoLorente92',
+  5
+)
+"""
+
+print score_answer(
+  '15-15-14',
+  'good',
+  'hristoivanov',
+  4
 )
