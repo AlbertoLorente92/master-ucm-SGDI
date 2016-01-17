@@ -13,7 +13,11 @@ con otros ni haberlo obtenido de una fuente externa.
 #################################################################
 
 from pymongo import MongoClient
-import json
+import json, ast
+from bson import Binary, Code
+from bson.json_util import dumps
+
+
 
 client = MongoClient()
 db = client.pruebas
@@ -107,22 +111,69 @@ def update_score(fecha, nota, idusuario, idcontestacion):
 
 # 8. Borrar una pregunta junto con todas sus respuestas, comentarios y 
 # puntuaciones
-def delete_question():
-    pass
+def delete_question(idpregunta):
+    deleteQuestion = db.preguntas.remove({'_id':idpregunta})
+    deleteAnswerAndComments = db.contestaciones.remove({'idpregunta':idpregunta})
+    """los delete de arriba no tienen funciones para poder hacer esto....
+    print deleteQuestion.items
+    if not deleteQuestion.hasWriteError() and not deleteAnswerAndComments.hasWriteError():
+      return json.dumps({'result': 'question, answer and comments deleted'})
+    else:
+      if deleteQuestion.hasWriteError():
+        return json.dumps({'result': deleteQuestion.writeError.errmsg})
+      else:
+        return json.dumps({'result': deleteAnswerAndComments.writeError.errmsg})"""
 
 
 # 9. Visualizar una determinada pregunta junto con todas sus contestaciones
 # y comentarios. A su vez las contestaciones vendran acompañadas de su
 # numero de puntuaciones buenas y malas.
-def get_question():
-    pass
-
+def get_question(idpregunta):
+    question = dumps(db.preguntas.find({'_id': idpregunta},{'_id':0,'titulo':1,'texto':1,'idusuario':1}))
+    answer = dumps(db.contestaciones.find({'idpregunta':idpregunta},{'texto':1,'idusuario':1,'valoracion.nota':1,'_id':0}))
+    jsonQ = byteify(json.loads(question))[0]
+    data = byteify(json.loads(answer))[0]
+    valoraciones = data['valoracion']
+    bad = 0
+    good = 0
+    for val in valoraciones:
+      if val['nota'] == 'bad':
+        bad = bad + 1
+      else:
+        good =  good + 1
+    jsonA = json.dumps({'respuesta':{'idusuario': data['idusuario'],'texto': data['texto'], 'buena': good, 'mala': bad}})
+    jsonQ['respuesta'] = jsonA
+    return jsonQ
 
 # 10. Buscar preguntas con unos determinados tags y mostrar su titulo, su autor
 # y su numero de contestaciones.
-def get_question_by_tag():
-    pass
-
+def get_question_by_tag(tags):
+    jsonPreguntas = []
+    for tag in tags:
+      jsonPreguntas.append({'tags': tag})      
+    question = byteify(json.loads(dumps(db.preguntas.find({'$or': jsonPreguntas},{'titulo':1,'idusuario':1,'_id':1}))))
+    idPreguntas = []
+    idP = [[0 for x in range(len(question))] for x in range(2)]
+    i = 0
+    for q in question:
+      idPreguntas.append({'idpregunta': q['_id']})
+      idP[i][0] = q['_id']
+      idP[i][1] = 0
+      i = i + 1
+    answer = byteify(json.loads(dumps(db.contestaciones.find({'$or': idPreguntas},{'idpregunta':1}))))
+    for a in answer:
+      i = 0
+      for i1,i2 in idP:    
+        if i1 == a['idpregunta']:
+          idP[i][1] = idP[i][1] + 1
+        i = i + 1
+    i = 0
+    for q in question:
+      for i1,i2 in idP:
+        if i1 == q['_id']:
+          question[i]['numrespuestas']= i2
+      i = i +1   
+    return question 
 
 # 11. Ver todas las preguntas o respuestas generadas por un determinado usuario.
 def get_entries_by_user():
@@ -161,6 +212,17 @@ def get_questions_by_tag():
 ################################################################################
 ############################  FUNCIONES AUXILIARES  ############################
 ################################################################################
+# Convierte las salidas a UTF-8
+def byteify(input):
+    if isinstance(input, dict):
+        return {byteify(key):byteify(value) for key,value in input.iteritems()}
+    elif isinstance(input, list):
+        return [byteify(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
+
 
 # Incluir aqui el resto de funciones necesarias
 def form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion):
@@ -269,7 +331,6 @@ print add_comment(
   'AlbertoLorente92',
   5
 )
-"""
 
 print score_answer(
   '15-15-14',
@@ -277,3 +338,8 @@ print score_answer(
   'hristoivanov',
   4
 )
+
+print delete_question(1)
+print get_question(1)"""
+
+print get_question_by_tag(['json','fortran'])
