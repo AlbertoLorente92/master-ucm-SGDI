@@ -16,6 +16,9 @@ import pymongo
 from pymongo import MongoClient
 import json
 from collections import Counter
+from bson import json_util
+
+
 from bson import Binary, Code
 from bson.json_util import dumps
 
@@ -27,94 +30,94 @@ db = client.pruebas
 def insert_user(_id, nombre, apellidos, experiencia, fecha, direccion):
   user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
   if not user:
-    return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'}, default=json_util.default)
   try:
     result = db.usuarios.insert_one(user)  
   except pymongo.errors.DuplicateKeyError, e:
-    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'}, default=json_util.default)
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)}, default=json_util.default)
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
 
 # 2. Actualizar un usuario
 def update_user(_id, nombre, apellidos, experiencia, fecha, direccion):
   user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
   if not user:
-    return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'}, default=json_util.default)
   result = db.usuarios.replace_one({'_id':_id}, user)
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count}, default=json_util.default)
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged update.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged update.'}, default=json_util.default)
 
 
 # 3. Añadir una pregunta
 def add_question( titulo, tags, fecha, texto, idusuario):
   question = form_question( titulo, tags, fecha, texto, idusuario)
   if not question:
-    return json.dumps({'status' : 1, 'msg' : 'Incomplete question.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete question.'}, default=json_util.default)
   try:
     result = db.preguntas.insert_one(question)
   except pymongo.errors.DuplicateKeyError, e:
-    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'}, default=json_util.default)
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)}, default=json_util.default)
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
 
 
 # 4. Añadir una respuesta a una pregunta.
 def add_answer(fecha, texto, idusuario, idpregunta):
   answer = form_answer(fecha, texto, idusuario, idpregunta)
   if not answer:
-    return json.dumps({'status' : 1, 'msg' : 'Incomplete answer.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete answer.'}, default=json_util.default)
   try:
     result =  db.contestaciones.insert_one(answer)
   except pymongo.errors.DuplicateKeyError, e:
-    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'}, default=json_util.default)
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)}, default=json_util.default)
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
     
 # 5. Comentar una respuesta.
 def add_comment(fecha, texto, idusuario, idcontestacion):
   comment = form_comment(fecha, texto, idusuario)
   if not comment:
-    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'}, default=json_util.default)
   # $push for lists and $addtoSet for Sets
   result = db.contestaciones.update_one({'_id':idcontestacion},{'$addToSet' :{'comentario':comment}})
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count}, default=json_util.default)
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
 
 
 # 6. Puntuar una respuesta.
 def score_answer(fecha, nota, idusuario, idcontestacion):
   score = form_score(fecha, nota, idusuario)
   if not score:
-    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'}, default=json_util.default)
   result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario' : {'$ne' : idusuario}},\
                                         {'$addToSet' :{'valoracion':score}})
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count}, default=json_util.default)
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
 
 
 # 7. Modificar una puntuacion de buena a mala o viceversa.
 def update_score(fecha, nota, idusuario, idcontestacion):
   score = form_score(fecha, nota, idusuario)
   if not score:
-    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'}, default=json_util.default)
   result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario':idusuario},\
                                         {'$set' :{'valoracion.$.nota':nota}})
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count}, default=json_util.default)
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged update.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged update.'}, default=json_util.default)
 
 
 # 8. Borrar una pregunta junto con todas sus respuestas, comentarios y 
@@ -125,9 +128,9 @@ def delete_question(idpregunta):
   if deleteQuestion.acknowledged and deleteAnswerAndComments.acknowledged:
     msg  = str(deleteQuestion.deleted_count)+' questions removed, plus '
     msg += str(deleteAnswerAndComments.deleted_count)+' answers remover.'
-    return json.dumps({'status' : 0, 'msg' : msg})
+    return json.dumps({'status' : 0, 'msg' : msg}, default=json_util.default)
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged delete.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged delete.'}, default=json_util.default)
 
 # 9. Visualizar una determinada pregunta junto con todas sus contestaciones
 # y comentarios. A su vez las contestaciones vendran acompañadas de su
@@ -135,7 +138,7 @@ def delete_question(idpregunta):
 def get_question(idpregunta):
   question = db.preguntas.find_one({'_id': idpregunta})
   if not question:
-    return json.dumps({'status' : 1, 'msg' : 'No question with id '+str(idpregunta)})
+    return json.dumps({'status' : 1, 'msg' : 'No question with id '+str(idpregunta)}, default=json_util.default)
   question['answers'] = []
   answers = db.contestaciones.find({'idpregunta':idpregunta})
   for ans in answers:
@@ -144,7 +147,7 @@ def get_question(idpregunta):
     ans['resumen_valoraciones'] = valoraciones
     question['answers'].append(ans)
 
-  return json.dumps({'status' : 0, 'result ': question}, indent=4, sort_keys=True)
+  return json.dumps({'status' : 0, 'result ': question}, indent=4, sort_keys=True, default=json_util.default)
   """
     question = dumps(db.preguntas.find({'_id': idpregunta},{'_id':0,'titulo':1,'texto':1,'idusuario':1}))
     answer = dumps(db.contestaciones.find({'idpregunta':idpregunta},{'texto':1,'idusuario':1,'valoracion.nota':1,'_id':0}))
@@ -173,7 +176,7 @@ def get_question_by_tag(tags):
   for qu in questions:
     qu['number_of_answers'] = db.contestaciones.count({'idpregunta' : qu['_id']})
     _questions.append(qu)
-  return json.dumps({'status' : 0, 'result ': _questions}, indent=4, sort_keys=True)
+  return json.dumps({'status' : 0, 'result ': _questions}, indent=4, sort_keys=True, default=json_util.default)
   """
     jsonPreguntas = []
     for tag in tags:
@@ -210,7 +213,7 @@ def get_entries_by_user(idusuario):
   answers = db.contestaciones.find({'idusuario':idusuario})
   answers= [an for an in answers]
   user_info = {'questions' : questions, 'answers' : answers}
-  return json.dumps({'status' : 0, 'result ': user_info}, indent=4, sort_keys=True)
+  return json.dumps({'status' : 0, 'result ': user_info}, indent=4, sort_keys=True, default=json_util.default)
 
 # 12. Ver todas las puntuaciones de un determinado usuario ordenadas por 
 # fecha. Este listado debe contener el tıtulo de la pregunta original 
