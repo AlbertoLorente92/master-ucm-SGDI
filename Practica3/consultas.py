@@ -187,8 +187,16 @@ def get_entries_by_user(idusuario):
 # 12. Ver todas las puntuaciones de un determinado usuario ordenadas por 
 # fecha. Este listado debe contener el tıtulo de la pregunta original 
 # cuya respuesta se puntuo.
-def get_scores():
-    pass
+def get_scores(idusuario):
+    scores = byteify(json.loads(dumps(db.contestaciones.find({'valoracion.idusuario':'drmane'},{'valoracion':{'$elemMatch':{'idusuario':'drmane'}},'idpregunta':1,'valoracion.fecha':1,'_id':0}).sort('valoracion.fecha'))))
+    idP = [[0 for x in range(2)] for x in range(len(scores))]
+    i = 0
+    for x in scores:
+      question = byteify(json.loads(dumps(db.preguntas.find({'_id':x['idpregunta']},{'titulo':1,'_id':0}))))[0]
+      scores[i]['titulo']=question['titulo']
+      print scores[i]
+      i = i + 1
+    return question
 
 
 # 13. Ver todos los datos de un usuario.
@@ -345,5 +353,6 @@ print score_answer(
 
 print delete_question(1)
 print get_question(1)
-print get_question_by_tag(['json','fortran'])"""
-print get_entries_by_user('linmdotor')
+print get_question_by_tag(['json','fortran'])
+print get_entries_by_user('linmdotor')"""
+print get_scores('drmane')
