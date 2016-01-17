@@ -16,10 +16,8 @@ import pymongo
 from pymongo import MongoClient
 import json
 from collections import Counter
-"""
 from bson import Binary, Code
 from bson.json_util import dumps
-"""
 
 
 client = MongoClient()
@@ -207,12 +205,12 @@ def get_question_by_tag(tags):
 
 # 11. Ver todas las preguntas o respuestas generadas por un determinado usuario.
 def get_entries_by_user(idusuario):
-    question = byteify(json.loads(dumps(db.preguntas.find({'idusuario':idusuario},{'titulo':1,'texto':1,'_id':0}))))
-    answer = byteify(json.loads(dumps(db.contestaciones.find({'idusuario':idusuario},{'texto':1,'_id':0}))))
-    jsonExit = byteify(json.loads(dumps({})))
-    jsonExit['questions']=question
-    jsonExit['answers']=answer
-    return jsonExit
+  questions = db.preguntas.find({'idusuario':idusuario})
+  questions = [qu for qu in questions]
+  answers = db.contestaciones.find({'idusuario':idusuario})
+  answers= [an for an in answers]
+  user_info = {'questions' : questions, 'answers' : answers}
+  return json.dumps({'status' : 0, 'result ': user_info}, indent=4, sort_keys=True)
 
 # 12. Ver todas las puntuaciones de un determinado usuario ordenadas por 
 # fecha. Este listado debe contener el tıtulo de la pregunta original 
