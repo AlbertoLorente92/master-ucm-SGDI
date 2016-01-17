@@ -322,7 +322,6 @@ def form_score(fecha, nota, idusuario):
 ################################################################################
 
 
-"""
 #01
 print insert_user( 
   'awesome_dude',
@@ -339,7 +338,6 @@ print insert_user(
 
 
 #02
-"""
 print update_user( 
   'awesome_dude',
   'The Dude', 
@@ -354,7 +352,6 @@ print update_user(
 )
 
 #03
-"""
 print add_question( 
   'Random Q',
   ['random'],
@@ -382,16 +379,16 @@ print score_answer(
   4
 )
 
-#07
-print delete_question(1)
-
 #08
 print update_score(
   '20-20-14',
-  'good',
+  'bad',
   'hristoivanov',
   4
 )
+
+#08
+print delete_question(1)
 
 #09
 print get_question(1)
@@ -415,5 +412,5 @@ print get_uses_by_expertise('java')
 print get_newest_questions(2)
 
 #16
-print get_questions_by_tag(2, 'linux')"""
+print get_questions_by_tag(2, 'linux')
 
