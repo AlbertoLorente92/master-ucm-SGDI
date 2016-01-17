@@ -223,9 +223,14 @@ def get_newest_questions(n):
 
 # 16. Ver n preguntas sobre un determinado tema, ordenadas de mayor a menor por
 # numero de contestaciones recibidas.
-def get_questions_by_tag():
-    pass
-    
+def get_questions_by_tag(n, tema):
+    questions = byteify(json.loads(dumps(db.preguntas.find({'tags':tema}).limit(n))))
+    i = 0
+    for x in questions:
+      answer = byteify(json.loads(dumps(db.contestaciones.find({'idpregunta':x['_id']}).count())))
+      questions[i]['numrespuestas']=answer
+      i = i + 1
+    return sorted(questions, key=lambda k: k['numrespuestas'], reverse=True)
     
 ################################################################################
 ############################  FUNCIONES AUXILIARES  ############################
@@ -363,5 +368,6 @@ print get_question_by_tag(['json','fortran'])
 print get_entries_by_user('linmdotor')
 print get_scores('drmane')
 print get_user('drmane')
-print get_uses_by_expertise('java')"""
-print get_newest_questions(2)
+print get_uses_by_expertise('java')
+print get_newest_questions(2)"""
+print get_questions_by_tag(2, 'linux')
