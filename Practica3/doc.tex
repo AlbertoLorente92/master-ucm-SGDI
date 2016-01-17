@@ -1,0 +1,138 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{caption} 
+
+\captionsetup{skip=-30pt}
+
+\pagenumbering{gobble}
+
+
+\begin{document}
+
+\title{Sistemas de Gestión de Datos y de la Información. Práctica 3. \\ Esquema implícito.}
+\author{Alberto Lorente y Hristo Ivanov}
+\maketitle
+
+  \begin{abstract}
+     Selección del esquema implícito para la base de datos de MongoDB.
+  \end{abstract}
+
+  \section{Elección}
+    Se ha elegido una estructura de 3 colecciones. Estas colecciones seran \emph{Usuarios, Preguntas y Contestaciones}
+    \par
+    La colección \texttt{Usuarios} contendrá los siguientes atributos:   
+    \begin{itemize}  
+        \item _id: correspondiente al alias del usuario 
+        \item nombre
+        \item apellidos
+        \item experiencia: lista de conocimientos del usuario
+        \item fecha: fecha de ingreso en la web
+        \item direccion
+        \begin{enumerate}
+          \item pais
+          \item ciudad
+          \item cp: codigo postal
+        \end{enumerate}
+    \end{itemize}
+    \par
+    La colección \texttt{Preguntas} contendrá los siguientes atributos:   
+    \begin{itemize}  
+        \item _id: autoasignado por la base de datos 
+        \item titulo
+        \item texto
+        \item fecha: fecha en la que se colgo la pregunta
+        \item tags: lista de etiquetas de la pregunta
+        \item idusuario: alias del usuario que cuelga la pregunta
+    \end{itemize}
+    \par
+    La colección \texttt{Contestaciones} contendrá los siguientes atributos:   
+    \begin{itemize}  
+        \item _id: autoasignado por la base de datos 
+        \item texto
+        \item fecha: fecha en la que se colgo la pregunta
+        \item valoracion
+        \begin{enumerate}
+          \item fecha: fecha de la valoracion
+          \item nota: goor or bad
+          \item idusuario: alias del usuario que evalua la respuesta
+        \end{enumerate}
+        \item idusuario: alias del usuario que cuelga la respuesta
+        \item idpregunta: id de la pregunta que responde este documento
+        \item comentario
+        \begin{enumerate}
+          \item fecha: fecha del comentario sobre la respuesta
+          \item texto
+          \item idusuario: alias del usuario que comenta la respuesta
+        \end{enumerate}
+    \end{itemize}
+    \par
+    Tenemos 4 posibles documentos \emph{Usuarios, Preguntas, Contestaciones y Comentarios}
+    y se ha decidido anidar los comentarios dentro de las Contestaciones. 
+
+  \section{Argumentación}
+    Existen numerosas posibilidades para hacer el esquema implícito de la base de datos.
+    Sin embargo se ha elegido esta ya que es en nuestra opinión la más fácil de manejar y
+    la que mejor se adapta a todas las consultas que se van a realizar.
+    \par
+    A continuación se listan las consultas y se marcan como buenas o malas según lo adecuado
+    con el esquema implícito elegido
+    \par
+    \begin{enumerate}
+      \item Añadir un usuario. \\
+      Solo añadir otro documento a la colección de usuario. Buena.
+      \item Actualizar un usuario. \\
+      Solo modifica un documento en la colección de usuario. Buena.
+      \item Añadir una pregunta. \\
+      Solo añadir otro documento a la colección de preguntas. Buena.      
+      \item Añadir una respuesta a una pregunta. \\
+      Solo añadir otro documento a la colección de contestaciones. Buena.
+      \item Comentar una respuesta. \\
+      Solo modificar un documento en la colección de contestaciones. Buena.
+      \item Puntuar una respuesta. \\
+      Solo modificar un documento en la colección de contestaciones. Buena.
+      \item Modificar una puntuación de buena a mala o viceversa. \\
+      Solo modificar un documento en la colección de contestaciones. Buena.
+      \item Borrar una pregunta junto con todas sus respuestas, comentarios y puntuaciones. \\
+      Borrar un documento de la colección de preguntas y \emph{n} de contestaciones.
+      Esto supone 2 accesos a la base de datos, lo que puede provocar alguna clase de inconsistencia
+      por la ejecución al mismo tiempo de otra operación. Sin embargo facilita el manejo de
+      la base de datos. Buena
+      \item Visualizar una determinada pregunta junto con todas sus contestaciones
+      y comentarios. A su vez las contestaciones vendrán acompañadas de su
+      número de puntuaciones buenas y malas. \\
+      El mismo caso que el apartado anterior. Buena.
+      \item Buscar preguntas con unos determinados tags y mostrar su título, su autor
+      y su número de contestaciones. \\
+      En este caso debemos buscar todas las preguntas con ciertos tags y posteriormente
+      todas las respuestas asociadas a dichas preguntas. Esto supone 2 consultas como 
+      en el apartado anterior. Buena.
+      \item Ver todas las preguntas o respuestas generadas por un determinado usuario. \\
+      Este es un caso semejante al anterior. Buena.
+      \item Ver todas las puntuaciones de un determinado usuario ordenadas por fecha.
+      Este listado debe contener el título de la pregunta original cuya respuesta
+      se puntuó. \\
+      Semejante al apartado anterior se debe ahcer 2 accesos a la base de datos para 
+      encontrar las valoraciones y añadirles el título de la pregunta. Buena.
+      \item Ver todos los datos de un usuario.\\
+      Solo se busca en la colección de usuarios. Buena.
+      \item Obtener los alias de los usuarios expertos en un determinado tema.\\
+      Solo se busca en la colección de usuarios. Buena.
+      \item Visualizar las n preguntas más actuales ordenadas por fecha, incluyendo
+      el número de contestaciones recibidas.\\
+      Supone 2 accesos a la base de datos. Uno primero para buscar las preguntas más actuales
+      y otro para añadir el número de contestaciones que tienen cada una. Buena.
+      \item Ver n preguntas sobre un determinado tema, ordenadas de mayor a menor
+      por número de contestaciones recibidas.\\
+      Se accede 2 veces a la base de datos preguntando sobre un tema a la colección de
+      preguntas y sobre el número de contestaciones a la colección de contestaciones. Esto 
+      ocasiona una dificultad dado que no podemos extraer de forma ordenada por el número de
+      contestaciones recibidas en una pregunta. Mala
+    \end{enumerate}
+
+    
+
+
+\end{document}

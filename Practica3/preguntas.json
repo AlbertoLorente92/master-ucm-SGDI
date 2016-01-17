@@ -25,4 +25,13 @@
 		"texto": "sudo apt-getinstall gfortran didnt work",
 		"idusuario": "drmane"
 	}
+	,
+	{
+		"_id": 4,
+		"titulo": "How do i xxx in ubuntu?",
+		"tags": ["linux"],
+		"fecha": "28-11-2015",
+		"texto": "sudo su",
+		"idusuario": "linmdotor"
+	}
 ]

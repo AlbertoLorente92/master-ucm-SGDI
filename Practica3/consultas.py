@@ -314,6 +314,7 @@ def form_score(fecha, nota, idusuario):
 ################################################################################
 
 """
+#01
 print insert_user( 
   'awesome_dude',
   'The Dude', 
@@ -327,6 +328,7 @@ print insert_user(
   },
   )
 
+#02
 print update_user( 
   'awesome_dude',
   'The Dude', 
@@ -338,16 +340,21 @@ print update_user(
     'cuidad' : 'madrid',
     'cp' : '28005',
   }
-  )
+)
 
+#03
 print add_question( 
   'Random Q',
   ['random'],
   '15-01-2016',
   'Win or lose',
   'AlbertoLorente92'
-  )
+)
 
+#04
+print add_answer('15-01-2016', 'hola', 'drmane', 1)
+  
+#05
 print add_comment(
   '15-15-15',
   'Texto',
@@ -355,6 +362,7 @@ print add_comment(
   5
 )
 
+#06
 print score_answer(
   '15-15-14',
   'good',
@@ -362,12 +370,37 @@ print score_answer(
   4
 )
 
+#07
+print update_score(  
+  '15-15-14',
+  'good',
+  'hristoivanov',
+  4
+)
+
+#08
 print delete_question(1)
+
+#09
 print get_question(1)
+
+#10
 print get_question_by_tag(['json','fortran'])
+
+#11
 print get_entries_by_user('linmdotor')
+
+#12
 print get_scores('drmane')
+
+#13
 print get_user('drmane')
+
+#14
 print get_uses_by_expertise('java')
+
+#15
 print get_newest_questions(2)"""
+
+#16
 print get_questions_by_tag(2, 'linux')
