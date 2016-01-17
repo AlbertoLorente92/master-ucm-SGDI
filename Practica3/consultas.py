@@ -28,13 +28,12 @@ def insert_user(_id, nombre, apellidos, experiencia, fecha, direccion):
   user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
   if not user:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'})
-  # TODO try, catch  duplicate key error index
   try:
     result = db.usuarios.insert_one(user)  
   except pymongo.errors.DuplicateKeyError, e:
     return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : result.inserted_id})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
   else:
     return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
@@ -69,12 +68,15 @@ def add_question( titulo, tags, fecha, texto, idusuario):
 def add_answer(fecha, texto, idusuario, idpregunta):
   answer = form_answer(fecha, texto, idusuario, idpregunta)
   if not answer:
-      return json.dumps({'result' : 'Incomplete answer.'})
-  result =  db.contestaciones.insert_one(answer)
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete answer.'})
+  try:
+    result =  db.contestaciones.insert_one(answer)
+  except pymongo.errors.DuplicateKeyError, e:
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
   if result.acknowledged:
-    return json.dumps({'result' : str(result.inserted_id)})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
     
 # 5. Comentar una respuesta.
 def add_comment(fecha, texto, idusuario, idcontestacion):
