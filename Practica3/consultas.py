@@ -36,32 +36,33 @@ def insert_user(_id, nombre, apellidos, experiencia, fecha, direccion):
   if result.acknowledged:
     return json.dumps({'status' : 0, 'msg' : result.inserted_id})
   else:
-    return json.dumps({'status' : 0, 'msg' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
 # 2. Actualizar un usuario
 def update_user(_id, nombre, apellidos, experiencia, fecha, direccion):
   user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
   if not user:
-    return json.dumps({'result' : 'Incomplete user.'})
-  # TODO try, catch posible errors
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'})
   result = db.usuarios.replace_one({'_id':_id}, user)
   if result.acknowledged:
-    return json.dumps({'result' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged update.'})
 
 
 # 3. Añadir una pregunta
 def add_question( titulo, tags, fecha, texto, idusuario):
   question = form_question( titulo, tags, fecha, texto, idusuario)
   if not question:
-    return json.dumps({'result' : 'Incomplete question.'})
-  # TODO try, catch  duplicate key error index
-  result = db.preguntas.insert_one(question)
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete question.'})
+  try:
+    result = db.preguntas.insert_one(question)
+  except pymongo.errors.DuplicateKeyError, e:
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
   if result.acknowledged:
-    return json.dumps({'result' : str(result.inserted_id)})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
 
 # 4. Añadir una respuesta a una pregunta.
@@ -306,6 +307,7 @@ def form_score(fecha, nota, idusuario):
 ############################  TEST #############################################
 ################################################################################
 
+"""
 print insert_user( 
   'awesome_dude',
   'The Dude', 
@@ -331,7 +333,7 @@ print update_user(
     'cp' : '28005',
   }
   )
-
+"""
 print add_question( 
   'Random Q',
   ['random'],
