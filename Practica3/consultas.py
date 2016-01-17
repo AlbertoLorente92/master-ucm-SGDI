@@ -114,24 +114,20 @@ def update_score(fecha, nota, idusuario, idcontestacion):
   if result.acknowledged:
     return json.dumps({'status' : 0, 'msg' : result.matched_count})
   else:
-    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged update.'})
 
 
 # 8. Borrar una pregunta junto con todas sus respuestas, comentarios y 
 # puntuaciones
 def delete_question(idpregunta):
-    deleteQuestion = db.preguntas.remove({'_id':idpregunta})
-    deleteAnswerAndComments = db.contestaciones.remove({'idpregunta':idpregunta})
-    """los delete de arriba no tienen funciones para poder hacer esto....
-    print deleteQuestion.items
-    if not deleteQuestion.hasWriteError() and not deleteAnswerAndComments.hasWriteError():
-      return json.dumps({'result': 'question, answer and comments deleted'})
-    else:
-      if deleteQuestion.hasWriteError():
-        return json.dumps({'result': deleteQuestion.writeError.errmsg})
-      else:
-        return json.dumps({'result': deleteAnswerAndComments.writeError.errmsg})"""
-
+  deleteQuestion = db.preguntas.delete_one({'_id':idpregunta})
+  deleteAnswerAndComments = db.contestaciones.delete_many({'idpregunta':idpregunta})
+  if deleteQuestion.acknowledged and deleteAnswerAndComments.acknowledged:
+    msg  = str(deleteQuestion.deleted_count)+' questions removed, plus '
+    msg += str(deleteAnswerAndComments.deleted_count)+' answers remover.'
+    return json.dumps({'status' : 0, 'msg' : msg})
+  else:
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged delete.'})
 
 # 9. Visualizar una determinada pregunta junto con todas sus contestaciones
 # y comentarios. A su vez las contestaciones vendran acompañadas de su
