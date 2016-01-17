@@ -81,7 +81,7 @@ def add_answer(fecha, texto, idusuario, idpregunta):
 # 5. Comentar una respuesta.
 def add_comment(fecha, texto, idusuario, idcontestacion):
   comment = form_comment(fecha, texto, idusuario)
-  if not answer:
+  if not comment:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'})
   # $push for lists and $addtoSet for Sets
   result = db.contestaciones.update_one({'_id':idcontestacion},{'$addToSet' :{'comentario':comment}})
@@ -95,25 +95,26 @@ def add_comment(fecha, texto, idusuario, idcontestacion):
 def score_answer(fecha, nota, idusuario, idcontestacion):
   score = form_score(fecha, nota, idusuario)
   if not score:
-      return json.dumps({'result' : 'Incomplete comment.'})
-  result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion': { "$in": {'idusuario': idusuario} } },\
-                                        {'$addToSet' :{'valoracion':score}}, True)
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'})
+  result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario' : {'$ne' : idusuario}},\
+                                        {'$addToSet' :{'valoracion':score}})
   if result.acknowledged:
-    return json.dumps({'result' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
 
 # 7. Modificar una puntuacion de buena a mala o viceversa.
 def update_score(fecha, nota, idusuario, idcontestacion):
   score = form_score(fecha, nota, idusuario)
   if not score:
-      return json.dumps({'result' : 'Incomplete comment.'})
-  result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario':idusuario},{'$set' :{'valoracion.$.nota':nota}})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'})
+  result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario':idusuario},\
+                                        {'$set' :{'valoracion.$.nota':nota}})
   if result.acknowledged:
-    return json.dumps({'result' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
 
 # 8. Borrar una pregunta junto con todas sus respuestas, comentarios y 
@@ -320,7 +321,6 @@ def form_score(fecha, nota, idusuario):
 ############################  TEST #############################################
 ################################################################################
 
-"""
 print insert_user( 
   'awesome_dude',
   'The Dude', 
@@ -333,7 +333,6 @@ print insert_user(
     'cp' : '28005',
   },
   )
-"""
 print update_user( 
   'awesome_dude',
   'The Dude', 
@@ -346,7 +345,6 @@ print update_user(
     'cp' : '28005',
   }
   )
-"""
 print add_question( 
   'Random Q',
   ['random'],
@@ -359,7 +357,7 @@ print add_comment(
   '15-15-15',
   'Texto',
   'AlbertoLorente92',
-  5
+  4
 )
 
 print score_answer(
@@ -369,6 +367,14 @@ print score_answer(
   4
 )
 
+print update_score(
+  '20-20-14',
+  'good',
+  'hristoivanov',
+  4
+)
+
+
 print delete_question(1)
 print get_question(1)
 print get_question_by_tag(['json','fortran'])
@@ -376,5 +382,5 @@ print get_entries_by_user('linmdotor')
 print get_scores('drmane')
 print get_user('drmane')
 print get_uses_by_expertise('java')
-print get_newest_questions(2)"""
+print get_newest_questions(2)
 print get_questions_by_tag(2, 'linux')
