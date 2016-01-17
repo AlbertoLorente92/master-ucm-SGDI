@@ -194,37 +194,48 @@ def get_entries_by_user(idusuario):
 # cuya respuesta se puntuo.
 def get_scores(idusuario):
     scores = byteify(json.loads(dumps(db.contestaciones.find({'valoracion.idusuario':'drmane'},{'valoracion':{'$elemMatch':{'idusuario':'drmane'}},'idpregunta':1,'valoracion.fecha':1,'_id':0}).sort('valoracion.fecha'))))
-    idP = [[0 for x in range(2)] for x in range(len(scores))]
     i = 0
     for x in scores:
       question = byteify(json.loads(dumps(db.preguntas.find({'_id':x['idpregunta']},{'titulo':1,'_id':0}))))[0]
       scores[i]['titulo']=question['titulo']
-      print scores[i]
       i = i + 1
     return question
 
 
 # 13. Ver todos los datos de un usuario.
-def get_user():
-    pass
+def get_user(idusuario):
+    usuario = byteify(json.loads(dumps(db.usuarios.find({'_id':idusuario}))))
+    return usuario
 
 
 # 14. Obtener los alias de los usuarios expertos en un determinado tema.
-def get_uses_by_expertise():
-    pass
+def get_uses_by_expertise(tema):
+    usuario = byteify(json.loads(dumps(db.usuarios.find({'experiencia':tema},{'_id':1}))))
+    return usuario
 
 
 # 15. Visualizar las n preguntas mas actuales ordenadas por fecha, incluyendo
 # el numero de contestaciones recibidas.
-def get_newest_questions():
-    pass
+def get_newest_questions(n):
+    questions = byteify(json.loads(dumps(db.preguntas.find().sort('fecha').limit(n))))
+    i = 0
+    for x in questions:
+      answer = byteify(json.loads(dumps(db.contestaciones.find({'idpregunta':x['_id']}).count())))
+      questions[i]['numrespuestas']=answer
+      i = i + 1
+    return questions
 
 
 # 16. Ver n preguntas sobre un determinado tema, ordenadas de mayor a menor por
 # numero de contestaciones recibidas.
-def get_questions_by_tag():
-    pass
-    
+def get_questions_by_tag(n, tema):
+    questions = byteify(json.loads(dumps(db.preguntas.find({'tags':tema}).limit(n))))
+    i = 0
+    for x in questions:
+      answer = byteify(json.loads(dumps(db.contestaciones.find({'idpregunta':x['_id']}).count())))
+      questions[i]['numrespuestas']=answer
+      i = i + 1
+    return sorted(questions, key=lambda k: k['numrespuestas'], reverse=True)
     
 ################################################################################
 ############################  FUNCIONES AUXILIARES  ############################
@@ -361,4 +372,7 @@ print get_question(1)
 print get_question_by_tag(['json','fortran'])
 print get_entries_by_user('linmdotor')
 print get_scores('drmane')
-"""
+print get_user('drmane')
+print get_uses_by_expertise('java')
+print get_newest_questions(2)"""
+print get_questions_by_tag(2, 'linux')
