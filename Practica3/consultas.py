@@ -82,13 +82,13 @@ def add_answer(fecha, texto, idusuario, idpregunta):
 def add_comment(fecha, texto, idusuario, idcontestacion):
   comment = form_comment(fecha, texto, idusuario)
   if not answer:
-      return json.dumps({'result' : 'Incomplete comment.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'})
   # $push for lists and $addtoSet for Sets
   result = db.contestaciones.update_one({'_id':idcontestacion},{'$addToSet' :{'comentario':comment}})
   if result.acknowledged:
-    return json.dumps({'result' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
 
 # 6. Puntuar una respuesta.
