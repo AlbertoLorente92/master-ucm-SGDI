@@ -4,7 +4,7 @@
 		"nombre": "hristo",
 		"apellidos": "ivanov ivanov",
 		"experiencia": ["python","java"],
-		"fecha": "14-03-2014",
+		"fecha": { "$date": 1392218911000 },
 		"direccion": {
 			"pais": "spain",
 			"ciudad": "madrid",
@@ -17,7 +17,7 @@
 		"nombre": "alberto",
 		"apellidos": "lorente sanchez",
 		"experiencia": ["java","html"],
-		"fecha": "19-12-2012",
+		"fecha": { "$date": 1392218911000 },
 		"direccion": {
 			"pais": "spain",
 			"ciudad": "madrid",
@@ -30,7 +30,7 @@
 		"nombre": "daniel",
 		"apellidos": "ruiz manero",
 		"experiencia": ["c++"],
-		"fecha": "9-04-2013",
+		"fecha": { "$date": 1392218911000 },
 		"direccion": {
 			"pais": "spain",
 			"ciudad": "burgos",
@@ -43,7 +43,7 @@
 		"nombre": "jesus",
 		"apellidos": "martinez dotor",
 		"experiencia": ["php","javascript"],
-		"fecha": "25-2-2013",
+		"fecha": { "$date": 1392218911000 },
 		"direccion": {
 			"pais": "spain",
 			"ciudad": "madrid",

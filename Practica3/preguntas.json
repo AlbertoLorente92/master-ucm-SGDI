@@ -3,7 +3,7 @@
 		"_id": 1,
 		"titulo": "How can i use mapreduce in mongodb?",
 		"tags": ["mongodb","mapreduce"],
-		"fecha": "01-01-2016",
+		"fecha": { "$date": 1392218911000 },
 		"texto": "I have to make a practice about it and i have no idea how to do it",
 		"idusuario": "linmdotor"
 	}
@@ -12,7 +12,7 @@
 		"_id": 2,
 		"titulo": "How can i make a list of items in JSON?",
 		"tags": ["json"],
-		"fecha": "15-12-2016",
+		"fecha": { "$date": 1392218911000 },
 		"texto": "I want to know how can i list some 'tags' inside only one attribute on json",
 		"idusuario": "linmdotor"
 	}
@@ -21,7 +21,7 @@
 		"_id": 3,
 		"titulo": "How do i install fortran in ubuntu?",
 		"tags": ["fortran","linux","consol"],
-		"fecha": "23-11-2015",
+		"fecha": { "$date": 1392218911000 },
 		"texto": "sudo apt-getinstall gfortran didnt work",
 		"idusuario": "drmane"
 	}
@@ -30,7 +30,7 @@
 		"_id": 4,
 		"titulo": "How do i xxx in ubuntu?",
 		"tags": ["linux"],
-		"fecha": "28-11-2015",
+		"fecha": { "$date": 1392218911000 },
 		"texto": "sudo su",
 		"idusuario": "linmdotor"
 	}
