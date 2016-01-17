@@ -12,6 +12,7 @@ con otros ni haberlo obtenido de una fuente externa.
 ## Es necesario añadir los parámetros adecuados a cada función ##
 #################################################################
 
+import pymongo
 from pymongo import MongoClient
 import json, ast
 from bson import Binary, Code
@@ -26,62 +27,68 @@ db = client.pruebas
 def insert_user(_id, nombre, apellidos, experiencia, fecha, direccion):
   user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
   if not user:
-    return json.dumps({'result' : 'Incomplete user.'})
-  # TODO try, catch  duplicate key error index
-  result = db.usuarios.insert_one(user)  
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'})
+  try:
+    result = db.usuarios.insert_one(user)  
+  except pymongo.errors.DuplicateKeyError, e:
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
   if result.acknowledged:
-    return json.dumps({'result' : result.inserted_id})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
 # 2. Actualizar un usuario
 def update_user(_id, nombre, apellidos, experiencia, fecha, direccion):
   user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
   if not user:
-    return json.dumps({'result' : 'Incomplete user.'})
-  # TODO try, catch posible errors
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'})
   result = db.usuarios.replace_one({'_id':_id}, user)
   if result.acknowledged:
-    return json.dumps({'result' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged update.'})
 
 
 # 3. Añadir una pregunta
 def add_question( titulo, tags, fecha, texto, idusuario):
   question = form_question( titulo, tags, fecha, texto, idusuario)
   if not question:
-    return json.dumps({'result' : 'Incomplete question.'})
-  # TODO try, catch  duplicate key error index
-  result = db.preguntas.insert_one(question)
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete question.'})
+  try:
+    result = db.preguntas.insert_one(question)
+  except pymongo.errors.DuplicateKeyError, e:
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
   if result.acknowledged:
-    return json.dumps({'result' : str(result.inserted_id)})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
 
 # 4. Añadir una respuesta a una pregunta.
 def add_answer(fecha, texto, idusuario, idpregunta):
   answer = form_answer(fecha, texto, idusuario, idpregunta)
   if not answer:
-      return json.dumps({'result' : 'Incomplete answer.'})
-  result =  db.contestaciones.insert_one(answer)
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete answer.'})
+  try:
+    result =  db.contestaciones.insert_one(answer)
+  except pymongo.errors.DuplicateKeyError, e:
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
   if result.acknowledged:
-    return json.dumps({'result' : str(result.inserted_id)})
+    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
     
 # 5. Comentar una respuesta.
 def add_comment(fecha, texto, idusuario, idcontestacion):
   comment = form_comment(fecha, texto, idusuario)
   if not answer:
-      return json.dumps({'result' : 'Incomplete comment.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'})
   # $push for lists and $addtoSet for Sets
   result = db.contestaciones.update_one({'_id':idcontestacion},{'$addToSet' :{'comentario':comment}})
   if result.acknowledged:
-    return json.dumps({'result' : result.matched_count})
+    return json.dumps({'status' : 0, 'msg' : result.matched_count})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'})
 
 
 # 6. Puntuar una respuesta.
@@ -327,8 +334,12 @@ print insert_user(
     'cp' : '28005',
   },
   )
+<<<<<<< HEAD
 
 #02
+=======
+"""
+>>>>>>> a09b61b65af305f0d76d0d951878d9cd694cd3b5
 print update_user( 
   'awesome_dude',
   'The Dude', 
@@ -340,9 +351,14 @@ print update_user(
     'cuidad' : 'madrid',
     'cp' : '28005',
   }
+<<<<<<< HEAD
 )
 
 #03
+=======
+  )
+"""
+>>>>>>> a09b61b65af305f0d76d0d951878d9cd694cd3b5
 print add_question( 
   'Random Q',
   ['random'],
@@ -401,6 +417,10 @@ print get_uses_by_expertise('java')
 
 #15
 print get_newest_questions(2)"""
+<<<<<<< HEAD
 
 #16
 print get_questions_by_tag(2, 'linux')
+=======
+print get_questions_by_tag(2, 'linux')
+>>>>>>> a09b61b65af305f0d76d0d951878d9cd694cd3b5
