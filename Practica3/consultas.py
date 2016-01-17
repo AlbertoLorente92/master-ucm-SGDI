@@ -14,10 +14,12 @@ con otros ni haberlo obtenido de una fuente externa.
 
 import pymongo
 from pymongo import MongoClient
-import json, ast
+import json
+from collections import Counter
+"""
 from bson import Binary, Code
 from bson.json_util import dumps
-
+"""
 
 
 client = MongoClient()
@@ -133,6 +135,19 @@ def delete_question(idpregunta):
 # y comentarios. A su vez las contestaciones vendran acompañadas de su
 # numero de puntuaciones buenas y malas.
 def get_question(idpregunta):
+  question = db.preguntas.find_one({'_id': idpregunta})
+  if not question:
+    return json.dumps({'status' : 1, 'msg' : 'No question with id '+str(idpregunta)})
+  question['answers'] = []
+  answers = db.contestaciones.find({'idpregunta':idpregunta})
+  for ans in answers:
+    valoraciones = [x['nota'] for x in ans['valoracion']]
+    valoraciones = Counter(valoraciones)
+    ans['resumen_valoraciones'] = valoraciones
+    question['answers'].append(ans)
+
+  return json.dumps({'status' : 0, 'result ': question}, indent=4, sort_keys=True)
+  """
     question = dumps(db.preguntas.find({'_id': idpregunta},{'_id':0,'titulo':1,'texto':1,'idusuario':1}))
     answer = dumps(db.contestaciones.find({'idpregunta':idpregunta},{'texto':1,'idusuario':1,'valoracion.nota':1,'_id':0}))
     jsonQ = byteify(json.loads(question))[0]
@@ -148,10 +163,20 @@ def get_question(idpregunta):
     jsonA = json.dumps({'respuesta':{'idusuario': data['idusuario'],'texto': data['texto'], 'buena': good, 'mala': bad}})
     jsonQ['respuesta'] = jsonA
     return jsonQ
+  """
 
 # 10. Buscar preguntas con unos determinados tags y mostrar su titulo, su autor
 # y su numero de contestaciones.
 def get_question_by_tag(tags):
+  # TODO testear más a fondo el sort, creo que esta bien, pero no estoy seguro.
+  # El sort ordena los elementos segun las coincidencia con los tags.
+  questions = db.preguntas.find({'tags' : {'$in' : tags }}, {'_id':1, 'titulo':1, 'idusuario':1}).sort([('tags', {'$in' : tags })])
+  _questions = []
+  for qu in questions:
+    qu['number_of_answers'] = db.contestaciones.count({'idpregunta' : qu['_id']})
+    _questions.append(qu)
+  return json.dumps({'status' : 0, 'result ': _questions}, indent=4, sort_keys=True)
+  """
     jsonPreguntas = []
     for tag in tags:
       jsonPreguntas.append({'tags': tag})      
@@ -178,6 +203,7 @@ def get_question_by_tag(tags):
           question[i]['numrespuestas']= i2
       i = i +1   
     return question 
+  """
 
 # 11. Ver todas las preguntas o respuestas generadas por un determinado usuario.
 def get_entries_by_user(idusuario):
@@ -387,10 +413,10 @@ print update_score(
 print delete_question(1)
 
 #09
-print get_question(1)
+print get_question(3)
 
 #10
-print get_question_by_tag(['json','fortran'])
+print get_question_by_tag(['json','fortran','linux'])
 
 #11
 print get_entries_by_user('linmdotor')
