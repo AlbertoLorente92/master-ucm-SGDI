@@ -176,9 +176,13 @@ def get_question_by_tag(tags):
     return question 
 
 # 11. Ver todas las preguntas o respuestas generadas por un determinado usuario.
-def get_entries_by_user():
-    pass
-
+def get_entries_by_user(idusuario):
+    question = byteify(json.loads(dumps(db.preguntas.find({'idusuario':idusuario},{'titulo':1,'texto':1,'_id':0}))))
+    answer = byteify(json.loads(dumps(db.contestaciones.find({'idusuario':idusuario},{'texto':1,'_id':0}))))
+    jsonExit = byteify(json.loads(dumps({})))
+    jsonExit['questions']=question
+    jsonExit['answers']=answer
+    return jsonExit
 
 # 12. Ver todas las puntuaciones de un determinado usuario ordenadas por 
 # fecha. Este listado debe contener el tıtulo de la pregunta original 
@@ -340,6 +344,6 @@ print score_answer(
 )
 
 print delete_question(1)
-print get_question(1)"""
-
-print get_question_by_tag(['json','fortran'])
+print get_question(1)
+print get_question_by_tag(['json','fortran'])"""
+print get_entries_by_user('linmdotor')
