@@ -12,6 +12,7 @@ con otros ni haberlo obtenido de una fuente externa.
 ## Es necesario añadir los parámetros adecuados a cada función ##
 #################################################################
 
+import pymongo
 from pymongo import MongoClient
 import json, ast
 from bson import Binary, Code
@@ -26,13 +27,16 @@ db = client.pruebas
 def insert_user(_id, nombre, apellidos, experiencia, fecha, direccion):
   user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
   if not user:
-    return json.dumps({'result' : 'Incomplete user.'})
+    return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'})
   # TODO try, catch  duplicate key error index
-  result = db.usuarios.insert_one(user)  
+  try:
+    result = db.usuarios.insert_one(user)  
+  except pymongo.errors.DuplicateKeyError, e:
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'})
   if result.acknowledged:
-    return json.dumps({'result' : result.inserted_id})
+    return json.dumps({'status' : 0, 'msg' : result.inserted_id})
   else:
-    return json.dumps({'result' : 'Not acknowledged insert.'})
+    return json.dumps({'status' : 0, 'msg' : 'Not acknowledged insert.'})
 
 # 2. Actualizar un usuario
 def update_user(_id, nombre, apellidos, experiencia, fecha, direccion):
@@ -302,7 +306,6 @@ def form_score(fecha, nota, idusuario):
 ############################  TEST #############################################
 ################################################################################
 
-"""
 print insert_user( 
   'awesome_dude',
   'The Dude', 
@@ -315,7 +318,7 @@ print insert_user(
     'cp' : '28005',
   },
   )
-
+"""
 print update_user( 
   'awesome_dude',
   'The Dude', 
@@ -354,5 +357,6 @@ print score_answer(
 print delete_question(1)
 print get_question(1)
 print get_question_by_tag(['json','fortran'])
-print get_entries_by_user('linmdotor')"""
+print get_entries_by_user('linmdotor')
 print get_scores('drmane')
+"""
