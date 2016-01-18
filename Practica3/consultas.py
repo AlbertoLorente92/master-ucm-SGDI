@@ -198,23 +198,23 @@ def get_user(idusuario):
 
 # 14. Obtener los alias de los usuarios expertos en un determinado tema.
 def get_uses_by_expertise(tema):
-    usuarios = db.usuarios.find({'experiencia':tema},{'_id':1})
-    usuarios = [us['_id'] for us in usuarios]
-    if not usuarios:
-      return json.dumps({'status': 1, 'msg': 'No user with experience in ' + tema}, default=json_util.default)
-    return json.dumps({'status': 0, 'result': usuarios}, indent=4, sort_keys=True, default=json_util.default)
+  usuarios = db.usuarios.find({'experiencia':tema},{'_id':1})
+  usuarios = [us['_id'] for us in usuarios]
+  if not usuarios:
+    return json.dumps({'status': 1, 'msg': 'No user with experience in ' + tema}, default=json_util.default)
+  return json.dumps({'status': 0, 'result': usuarios}, indent=4, sort_keys=True, default=json_util.default)
 
 # 15. Visualizar las n preguntas mas actuales ordenadas por fecha, incluyendo
 # el numero de contestaciones recibidas.
 def get_newest_questions(n):
-    questions = db.preguntas.find({},limit=n,sort=[('fecha',pymongo.DESCENDING)])
-    if not questions:
-      return json.dumps({'status': 1, 'msg': 'There is no questions'}, default=json_util.default)
-    _questions = []
-    for q in questions:
-      q['num_respuestas'] = db.contestaciones.find({'idpregunta':q['_id']}).count()
-      _questions.append(q)
-    return json.dumps({'status':0, 'result': _questions}, indent=4, sort_keys=True, default=json_util.default)
+  questions = db.preguntas.find({},limit=n,sort=[('fecha',pymongo.DESCENDING)])
+  if not questions:
+    return json.dumps({'status': 1, 'msg': 'There is no questions'}, default=json_util.default)
+  _questions = []
+  for q in questions:
+    q['num_respuestas'] = db.contestaciones.find({'idpregunta':q['_id']}).count()
+    _questions.append(q)
+  return json.dumps({'status':0, 'result': _questions}, indent=4, sort_keys=True, default=json_util.default)
     
 # 16. Ver n preguntas sobre un determinado tema, ordenadas de mayor a menor por
 # numero de contestaciones recibidas.
