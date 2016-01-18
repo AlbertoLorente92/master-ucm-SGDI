@@ -198,10 +198,11 @@ def get_user(idusuario):
 
 # 14. Obtener los alias de los usuarios expertos en un determinado tema.
 def get_uses_by_expertise(tema):
-    usuario = db.usuarios.find_one({'experiencia':tema},{'_id':1})
-    if not usuario:
+    usuarios = db.usuarios.find({'experiencia':tema},{'_id':1})
+    usuarios = [us['_id'] for us in usuarios]
+    if not usuarios:
       return json.dumps({'status': 1, 'msg': 'No user with experience in ' + tema}, default=json_util.default)
-    return json.dumps({'status': 0, 'result': usuario}, default=json_util.default)
+    return json.dumps({'status': 0, 'result': usuarios}, indent=4, sort_keys=True, default=json_util.default)
 
 # 15. Visualizar las n preguntas mas actuales ordenadas por fecha, incluyendo
 # el numero de contestaciones recibidas.
@@ -299,7 +300,6 @@ def form_score(nota, idusuario):
 ############################  TEST #############################################
 ################################################################################
 
-"""
 #01
 print insert_user( 
   'awesome_dude',
@@ -376,13 +376,14 @@ print get_entries_by_user('linmdotor')
 print get_scores('drmane')
 
 #13
+print '------------------------>'
 print get_user('hristoivanov')
 
 #14
-print get_uses_by_expertise('java')
+print get_uses_by_expertise('c++')
 
 #15
 print get_newest_questions(2)
-"""
+
 #16
 print get_questions_by_tag(2, 'linux')
