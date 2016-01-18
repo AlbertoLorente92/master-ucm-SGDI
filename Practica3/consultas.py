@@ -218,29 +218,20 @@ def get_newest_questions(n):
 # 16. Ver n preguntas sobre un determinado tema, ordenadas de mayor a menor por
 # numero de contestaciones recibidas.
 def get_questions_by_tag(n, tema):
-    questions = byteify(json.loads(dumps(db.preguntas.find({'tags':tema}).limit(n))))
-    i = 0
-    for x in questions:
-      answer = byteify(json.loads(dumps(db.contestaciones.find({'idpregunta':x['_id']}).count())))
-      questions[i]['numrespuestas']=answer
-      i = i + 1
-    return sorted(questions, key=lambda k: k['numrespuestas'], reverse=True)
-    
+    questions = db.preguntas.find({'tags':tema}).limit(n)
+    if not questions:
+      return json.dumps({'status': 1, 'msg': 'There is no questions'}, default=json_util.default)
+    _questions = []
+    for q in questions:
+      q['num_respuestas'] = db.contestaciones.find({'idpregunta':q['_id']}).count()
+      _questions.append(q)
+    return json.dumps({'status':0, 'result': _questions},sort_keys=True, default=json_util.default)
+####Podemos ordenar el json por un atributo? esto ordena por _id
+####El problema es que tenemos que acceder a contestaciones para saber como ordenar las preguntas....
+
 ################################################################################
 ############################  FUNCIONES AUXILIARES  ############################
 ################################################################################
-# Convierte las salidas a UTF-8
-def byteify(input):
-    if isinstance(input, dict):
-        return {byteify(key):byteify(value) for key,value in input.iteritems()}
-    elif isinstance(input, list):
-        return [byteify(element) for element in input]
-    elif isinstance(input, unicode):
-        return input.encode('utf-8')
-    else:
-        return input
-
-
 # Incluir aqui el resto de funciones necesarias
 def form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha=True):
   # Direccion debe tener los siguientes campos.
@@ -385,16 +376,13 @@ print get_entries_by_user('linmdotor')
 print get_scores('drmane')
 
 #13
-print '--------------------------------------------<<<<<<<<<<<<<<<'
 print get_user('hristoivanov')
 
 #14
 print get_uses_by_expertise('java')
-"""
+
 #15
 print get_newest_questions(2)
 """
 #16
 print get_questions_by_tag(2, 'linux')
-
-"""
