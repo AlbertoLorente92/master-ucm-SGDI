@@ -5,30 +5,28 @@
 // Listado de pais-numero de usuarios ordenado de mayor a menor por numero de 
 // usuarios.
 function agg1(){
-  db.sgdi.aggregate([{$group:{_id:"$country","num_users":{$sum:1}}},{$sort:{"num_users":-1}}])
-  return "";
+  return db.sgdi.aggregate([{$group:{_id:"$country","num_users":{$sum:1}}},{$sort:{"num_users":-1}}])
 }
 
 
 // Listado de pais-numero total de posts de los 3 paises con mayor numero total 
 // de posts, ordenado de mayor a menor por numero de posts.
 function agg2(){
-  db.sgdi.aggregate([{$group:{_id:"$country","num_posts":{$sum:"$num_posts"}}},{$sort:{"num_posts":-1}},{$limit:3}])
-	return "";
+  return db.sgdi.aggregate([{$group:{_id:"$country","num_posts":{$sum:"$num_posts"}}},{$sort:{"num_posts":-1}},{$limit:3}])
 }
 
   
 // Listado de aficion-numero de usuarios ordenado de mayor a menor numero de 
 // usuarios.
 function agg3(){
-	return "";
+  return db.sgdi.aggregate([{$unwind:"$likes"},{$group:{_id:"$likes","num_users":{$sum:1}}},{$sort:{"num_users":-1}}])
 }  
   
   
 // Listado de aficion-numero de usuarios restringido a usuarios espanoles y
 // ordenado de mayor a menor numero de usuarios.
 function agg4(){
-  return "";
+  return db.sgdi.aggregate([{$unwind:"$likes"},{$match:{country:"Spain"}},{$group:{_id:"$likes","num_users":{$sum:1}}},{$sort:{"num_users":-1}}]);
 }
 
 
