@@ -219,14 +219,15 @@ def get_newest_questions(n):
 # 16. Ver n preguntas sobre un determinado tema, ordenadas de mayor a menor por
 # numero de contestaciones recibidas.
 def get_questions_by_tag(n, tema):
-    questions = db.preguntas.find({'tags':tema}).limit(n)
-    if not questions:
-      return json.dumps({'status': 1, 'msg': 'There is no questions'}, default=json_util.default)
-    _questions = []
-    for q in questions:
-      q['num_respuestas'] = db.contestaciones.find({'idpregunta':q['_id']}).count()
-      _questions.append(q)
-    return json.dumps({'status':0, 'result': _questions},sort_keys=True, default=json_util.default)
+  questions = db.preguntas.find({'tags':tema})
+  _questions = []
+  for q in questions:
+    q['num_respuestas'] = db.contestaciones.find({'idpregunta':q['_id']}).count()
+    _questions.append(q)
+  if not _questions:
+    return json.dumps({'status': 1, 'msg': 'There is no questions with tag '+tema}, default=json_util.default)
+  _questions.sort(key=lambda x: x['num_respuestas'], reverse=True)
+  return json.dumps({'status':0, 'result': _questions[:n]}, indent=4, sort_keys=True, default=json_util.default)
 ####Podemos ordenar el json por un atributo? esto ordena por _id
 ####El problema es que tenemos que acceder a contestaciones para saber como ordenar las preguntas....
 
