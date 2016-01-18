@@ -37,7 +37,7 @@ function agg4(){
   
 // Listado de aficion-numero de usuarios restringido a usuarios espanoles.
 function mr1(){
-	return "";
+  return db.sgdi.mapReduce(c1,c2,{out:"outputMR1"},{query:{}})
 }
 
 
@@ -59,6 +59,16 @@ function mr4(){
 	return "";
 }
 
+var c1 = function f1(){
+  if(this.country=="Spain" && typeof this.likes != "undefined"){
+    for (var idx = 0; idx < this.likes.length; idx++) {
+         var key = this.likes[idx];
+         emit(key, 1);
+     }
+  }
+};
 
-
+var c2 = function f2(key,value){
+  return key,Array.sum(value)
+};
 
