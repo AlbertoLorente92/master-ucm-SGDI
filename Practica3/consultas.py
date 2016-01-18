@@ -17,6 +17,7 @@ from pymongo import MongoClient
 import json
 from collections import Counter
 from bson import json_util
+from datetime import datetime
 
 
 from bson import Binary, Code
@@ -27,8 +28,8 @@ client = MongoClient()
 db = client.pruebas
 
 # 1. Añadir un usuario
-def insert_user(_id, nombre, apellidos, experiencia, fecha, direccion):
-  user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
+def insert_user(_id, nombre, apellidos, experiencia, direccion):
+  user = form_usuario(_id, nombre, apellidos, experiencia, direccion)
   if not user:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'}, default=json_util.default)
   try:
@@ -41,8 +42,8 @@ def insert_user(_id, nombre, apellidos, experiencia, fecha, direccion):
     return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
 
 # 2. Actualizar un usuario
-def update_user(_id, nombre, apellidos, experiencia, fecha, direccion):
-  user = form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion)
+def update_user(_id, nombre, apellidos, experiencia, direccion):
+  user = form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha = False)
   if not user:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'}, default=json_util.default)
   result = db.usuarios.replace_one({'_id':_id}, user)
@@ -53,8 +54,8 @@ def update_user(_id, nombre, apellidos, experiencia, fecha, direccion):
 
 
 # 3. Añadir una pregunta
-def add_question( titulo, tags, fecha, texto, idusuario):
-  question = form_question( titulo, tags, fecha, texto, idusuario)
+def add_question( titulo, tags, texto, idusuario):
+  question = form_question( titulo, tags, texto, idusuario)
   if not question:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete question.'}, default=json_util.default)
   try:
@@ -68,8 +69,8 @@ def add_question( titulo, tags, fecha, texto, idusuario):
 
 
 # 4. Añadir una respuesta a una pregunta.
-def add_answer(fecha, texto, idusuario, idpregunta):
-  answer = form_answer(fecha, texto, idusuario, idpregunta)
+def add_answer(texto, idusuario, idpregunta):
+  answer = form_answer(texto, idusuario, idpregunta)
   if not answer:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete answer.'}, default=json_util.default)
   try:
@@ -82,8 +83,8 @@ def add_answer(fecha, texto, idusuario, idpregunta):
     return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
     
 # 5. Comentar una respuesta.
-def add_comment(fecha, texto, idusuario, idcontestacion):
-  comment = form_comment(fecha, texto, idusuario)
+def add_comment(texto, idusuario, idcontestacion):
+  comment = form_comment(texto, idusuario)
   if not comment:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'}, default=json_util.default)
   # $push for lists and $addtoSet for Sets
@@ -95,8 +96,8 @@ def add_comment(fecha, texto, idusuario, idcontestacion):
 
 
 # 6. Puntuar una respuesta.
-def score_answer(fecha, nota, idusuario, idcontestacion):
-  score = form_score(fecha, nota, idusuario)
+def score_answer(nota, idusuario, idcontestacion):
+  score = form_score(nota, idusuario)
   if not score:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'}, default=json_util.default)
   result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario' : {'$ne' : idusuario}},\
@@ -108,8 +109,8 @@ def score_answer(fecha, nota, idusuario, idcontestacion):
 
 
 # 7. Modificar una puntuacion de buena a mala o viceversa.
-def update_score(fecha, nota, idusuario, idcontestacion):
-  score = form_score(fecha, nota, idusuario)
+def update_score(nota, idusuario, idcontestacion):
+  score = form_score(nota, idusuario)
   if not score:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'}, default=json_util.default)
   result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario':idusuario},\
@@ -148,23 +149,7 @@ def get_question(idpregunta):
     question['answers'].append(ans)
 
   return json.dumps({'status' : 0, 'result ': question}, indent=4, sort_keys=True, default=json_util.default)
-  """
-    question = dumps(db.preguntas.find({'_id': idpregunta},{'_id':0,'titulo':1,'texto':1,'idusuario':1}))
-    answer = dumps(db.contestaciones.find({'idpregunta':idpregunta},{'texto':1,'idusuario':1,'valoracion.nota':1,'_id':0}))
-    jsonQ = byteify(json.loads(question))[0]
-    data = byteify(json.loads(answer))[0]
-    valoraciones = data['valoracion']
-    bad = 0
-    good = 0
-    for val in valoraciones:
-      if val['nota'] == 'bad':
-        bad = bad + 1
-      else:
-        good =  good + 1
-    jsonA = json.dumps({'respuesta':{'idusuario': data['idusuario'],'texto': data['texto'], 'buena': good, 'mala': bad}})
-    jsonQ['respuesta'] = jsonA
-    return jsonQ
-  """
+
 
 # 10. Buscar preguntas con unos determinados tags y mostrar su titulo, su autor
 # y su numero de contestaciones.
@@ -177,34 +162,7 @@ def get_question_by_tag(tags):
     qu['number_of_answers'] = db.contestaciones.count({'idpregunta' : qu['_id']})
     _questions.append(qu)
   return json.dumps({'status' : 0, 'result ': _questions}, indent=4, sort_keys=True, default=json_util.default)
-  """
-    jsonPreguntas = []
-    for tag in tags:
-      jsonPreguntas.append({'tags': tag})      
-    question = byteify(json.loads(dumps(db.preguntas.find({'$or': jsonPreguntas},{'titulo':1,'idusuario':1,'_id':1}))))
-    idPreguntas = []
-    idP = [[0 for x in range(len(question))] for x in range(2)]
-    i = 0
-    for q in question:
-      idPreguntas.append({'idpregunta': q['_id']})
-      idP[i][0] = q['_id']
-      idP[i][1] = 0
-      i = i + 1
-    answer = byteify(json.loads(dumps(db.contestaciones.find({'$or': idPreguntas},{'idpregunta':1}))))
-    for a in answer:
-      i = 0
-      for i1,i2 in idP:    
-        if i1 == a['idpregunta']:
-          idP[i][1] = idP[i][1] + 1
-        i = i + 1
-    i = 0
-    for q in question:
-      for i1,i2 in idP:
-        if i1 == q['_id']:
-          question[i]['numrespuestas']= i2
-      i = i +1   
-    return question 
-  """
+
 
 # 11. Ver todas las preguntas o respuestas generadas por un determinado usuario.
 def get_entries_by_user(idusuario):
@@ -281,40 +239,41 @@ def byteify(input):
 
 
 # Incluir aqui el resto de funciones necesarias
-def form_usuario(_id, nombre, apellidos, experiencia, fecha, direccion):
+def form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha=True):
   # Direccion debe tener los siguientes campos.
   if not 'pais' in direccion or not 'cuidad' in direccion or not 'cp' in direccion:
     return None
   # Experiencia puede ser vacio: un novato que quiere aprender.
-  if not all([_id, nombre, apellidos, fecha]):
+  if not all([_id, nombre, apellidos]):
     return None
   user = 	{
 		"_id": _id,
 		"nombre": nombre,
 		"apellidos": apellidos,
 		"experiencia": experiencia,
-		"fecha": fecha,
 		"direccion": direccion,
 	}
+  if fecha:
+    user['fecha'] = datetime.now()
   return user
 
-def form_question(titulo, tags, fecha, texto, idusuario):
-  if not all([titulo, fecha, texto, idusuario]):
+def form_question(titulo, tags, texto, idusuario):
+  if not all([titulo, texto, idusuario]):
     return None
   question = {
     "titulo": titulo,    
     "tags": tags,
-    "fecha": fecha,
+    "fecha": datetime.now(),
     "texto": texto,
     "idusuario": idusuario,
   }
   return question
 
-def form_answer(fecha, texto, idusuario, idpregunta):
-  if not all([fecha, texto, idusuario]):
+def form_answer(texto, idusuario, idpregunta):
+  if not all([texto, idusuario]):
     return None
   respuesta = {
-		"fecha": fecha,
+		"fecha": datetime.now(),
 		"texto": texto,
 		"idusuario": idusuario,
     "idpregunta": idpregunta,
@@ -323,21 +282,21 @@ def form_answer(fecha, texto, idusuario, idpregunta):
   }
   return respuesta
 
-def form_comment(fecha, texto, idusuario):
-  if not all([fecha, texto, idusuario]):
+def form_comment(texto, idusuario):
+  if not all([texto, idusuario]):
     return None
   comment = {
-		"fecha": fecha,
+		"fecha": datetime.now(),
 		"texto": texto,
 		"idusuario": idusuario,
   }
   return comment
 
-def form_score(fecha, nota, idusuario):
-  if not all([fecha, nota, idusuario]):
+def form_score(nota, idusuario):
+  if not all([nota, idusuario]):
     return None
   score = {
-		"fecha": fecha,
+		"fecha": datetime.now(),
 		"nota": nota,
 		"idusuario": idusuario,
   }
@@ -353,7 +312,6 @@ print insert_user(
   'The Dude', 
   'Jeff The Dude Letrotski',
   ['python', 'orm'],
-  '14-03-2015',
   {
     'pais' : 'spain',
     'cuidad' : 'madrid',
@@ -368,7 +326,6 @@ print update_user(
   'The Dude', 
   'Jeff The Dude Letrotski',
   ['python', 'orm', 'c++'],
-  '14-03-2016',
   {
     'pais' : 'spain',
     'cuidad' : 'madrid',
@@ -380,17 +337,15 @@ print update_user(
 print add_question( 
   'Random Q',
   ['random'],
-  '15-01-2016',
   'Win or lose',
   'AlbertoLorente92'
 )
 
 #04
-print add_answer('15-01-2016', 'hola', 'drmane', 1)
+print add_answer('hola', 'drmane', 1)
   
 #05
 print add_comment(
-  '15-15-15',
   'Texto',
   'AlbertoLorente92',
   4
@@ -398,7 +353,6 @@ print add_comment(
 
 #06
 print score_answer(
-  '15-15-14',
   'good',
   'hristoivanov',
   4
@@ -406,7 +360,6 @@ print score_answer(
 
 #08
 print update_score(
-  '20-20-14',
   'bad',
   'hristoivanov',
   4
