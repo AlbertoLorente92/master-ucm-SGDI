@@ -42,8 +42,8 @@ def insert_user(_id, nombre, apellidos, experiencia, direccion):
     return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
 
 # 2. Actualizar un usuario
-def update_user(_id, nombre, apellidos, experiencia, direccion):
-  user = form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha = False)
+def update_user(_id, nombre, apellidos, experiencia, direccion, fecha):
+  user = form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha)
   if not user:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'}, default=json_util.default)
   result = db.usuarios.replace_one({'_id':_id}, user)
@@ -190,8 +190,10 @@ def get_scores(idusuario):
 
 # 13. Ver todos los datos de un usuario.
 def get_user(idusuario):
-    usuario = byteify(json.loads(dumps(db.usuarios.find({'_id':idusuario}))))
-    return usuario
+  usuario = db.usuarios.find_one({'_id' : idusuario})
+  if not usuario:
+    return json.dumps({'status' : 1, 'msg' : 'No user with id '+str(idusuario)}, default=json_util.default)
+  return json.dumps({'status' : 0, 'result ': usuario}, indent=4, sort_keys=True, default=json_util.default)
 
 
 # 14. Obtener los alias de los usuarios expertos en un determinado tema.
@@ -254,7 +256,7 @@ def form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha=True):
 		"direccion": direccion,
 	}
   if fecha:
-    user['fecha'] = datetime.now()
+    user['fecha'] = fecha
   return user
 
 def form_question(titulo, tags, texto, idusuario):
@@ -330,7 +332,8 @@ print update_user(
     'pais' : 'spain',
     'cuidad' : 'madrid',
     'cp' : '28005',
-  }
+  },
+  fecha = datetime.now()
 )
 
 #03
@@ -381,7 +384,8 @@ print get_entries_by_user('linmdotor')
 print get_scores('drmane')
 
 #13
-print get_user('drmane')
+print '--------------------------------------------<<<<<<<<<<<<<<<'
+print get_user('awesome_dude')
 
 #14
 print get_uses_by_expertise('java')
