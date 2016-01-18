@@ -37,26 +37,26 @@ function agg4(){
   
 // Listado de aficion-numero de usuarios restringido a usuarios espanoles.
 function mr1(){
-  return db.sgdi.mapReduce(c1,c2,{out:"outputMR1"},{query:{}})
+  return db.sgdi.mapReduce(c1,c2,{out:"outputMR1"});
 }
 
 
 // Listado de numero de aficiones-numero de usuarios, es decir, cuAntos
 // usuarios tienen 0 aficiones, cuantos una aficion, cuantos dos aficiones, etc.
 function mr2(){
-	return "";
+	return db.sgdi.mapReduce(c3,c2,{out:"outputMR2"});
 }
 
 
 // Listado de pais-numero de usuarios que tienen mas posts que contestaciones.
 function mr3(){
-	return "";
+	return db.sgdi.mapReduce(c4,c2,{out:"outputMR3"});
 }
 
 
 // Listado de pais-media de posts por usuario.
 function mr4(){
-	return "";
+	return db.sgdi.mapReduce(c5,c6,{out:"outputMR4"});
 }
 
 var c1 = function f1(){
@@ -72,3 +72,23 @@ var c2 = function f2(key,value){
   return key,Array.sum(value)
 };
 
+var c3 = function f3(){
+  if(typeof this.likes == "undefined" || this.likes.length==0){
+    emit(0,1)
+  }else{
+    emit(this.likes.length,1) 
+  }
+};
+
+var c4 = function f4(){
+  if(this.num_posts>this.num_answers) 
+    emit(this.country,1)
+}
+
+var c5 = function f5(){
+  emit(this.country,this.num_posts)
+};
+
+var c6 = function f6(key,value){
+  return key,Array.avg(value)
+};
