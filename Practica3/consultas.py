@@ -35,15 +35,15 @@ def insert_user(_id, nombre, apellidos, experiencia, direccion):
   try:
     result = db.usuarios.insert_one(user)  
   except pymongo.errors.DuplicateKeyError, e:
-    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'}, default=json_util.default)
+    return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error: '+_id}, default=json_util.default)
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)}, default=json_util.default)
+    return json.dumps({'status' : 0, 'msg' : result.inserted_id}, default=json_util.default)
   else:
     return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
 
 # 2. Actualizar un usuario
-def update_user(_id, nombre, apellidos, experiencia, direccion, fecha):
-  user = form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha)
+def update_user(_id, nombre, apellidos, experiencia, direccion):
+  user = form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha=False)
   if not user:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete user.'}, default=json_util.default)
   result = db.usuarios.replace_one({'_id':_id}, user)
@@ -58,12 +58,14 @@ def add_question( titulo, tags, texto, idusuario):
   question = form_question( titulo, tags, texto, idusuario)
   if not question:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete question.'}, default=json_util.default)
+  if json.loads(get_user(idusuario))['status'] != 0:
+    return json.dumps({'status' : 1, 'msg' : 'Incorect Userid.'}, default=json_util.default)
   try:
     result = db.preguntas.insert_one(question)
   except pymongo.errors.DuplicateKeyError, e:
     return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'}, default=json_util.default)
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)}, default=json_util.default)
+    return json.dumps({'status' : 0, 'msg' : result.inserted_id}, default=json_util.default)
   else:
     return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
 
@@ -73,12 +75,14 @@ def add_answer(texto, idusuario, idpregunta):
   answer = form_answer(texto, idusuario, idpregunta)
   if not answer:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete answer.'}, default=json_util.default)
+  if json.loads(get_user(idusuario))['status'] != 0:
+    return json.dumps({'status' : 1, 'msg' : 'Incorect Userid.'}, default=json_util.default)
   try:
     result =  db.contestaciones.insert_one(answer)
   except pymongo.errors.DuplicateKeyError, e:
     return json.dumps({'status' : 1, 'msg' : 'Duplicate Key Error.'}, default=json_util.default)
   if result.acknowledged:
-    return json.dumps({'status' : 0, 'msg' : str(result.inserted_id)}, default=json_util.default)
+    return json.dumps({'status' : 0, 'msg' : result.inserted_id}, default=json_util.default)
   else:
     return json.dumps({'status' : 2, 'msg' : 'Not acknowledged insert.'}, default=json_util.default)
     
@@ -87,8 +91,10 @@ def add_comment(texto, idusuario, idcontestacion):
   comment = form_comment(texto, idusuario)
   if not comment:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'}, default=json_util.default)
+  if json.loads(get_user(idusuario))['status'] != 0:
+    return json.dumps({'status' : 1, 'msg' : 'Incorect Userid.'}, default=json_util.default)
   # $push for lists and $addtoSet for Sets
-  result = db.contestaciones.update_one({'_id':idcontestacion},{'$addToSet' :{'comentario':comment}})
+  result = db.contestaciones.update_one({'_id': idcontestacion},{'$addToSet' :{'comentario':comment}})
   if result.acknowledged:
     return json.dumps({'status' : 0, 'msg' : result.matched_count}, default=json_util.default)
   else:
@@ -250,7 +256,7 @@ def form_usuario(_id, nombre, apellidos, experiencia, direccion, fecha=True):
 		"direccion": direccion,
 	}
   if fecha:
-    user['fecha'] = fecha
+    user['fecha'] = datetime.now()
   return user
 
 def form_question(titulo, tags, texto, idusuario):
@@ -301,6 +307,7 @@ def form_score(nota, idusuario):
 ############################  TEST #############################################
 ################################################################################
 
+"""
 #01
 print insert_user( 
   'awesome_dude',
@@ -388,3 +395,4 @@ print get_newest_questions(3)
 
 #16
 print get_questions_by_tag(2, 'linux')
+"""
