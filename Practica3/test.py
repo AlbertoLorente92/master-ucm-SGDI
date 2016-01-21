@@ -252,7 +252,10 @@ def test9(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
   pass
 
 def test10(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
-  pass
+  tags = get_expertises_tags()
+  print 'Vamos a buscar estos tags:', tags
+  response = get_question_by_tag(tags)
+  print '     ', response
 
 def test11(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
   pass

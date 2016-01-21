@@ -162,7 +162,6 @@ def get_question(idpregunta):
 # 10. Buscar preguntas con unos determinados tags y mostrar su titulo, su autor
 # y su numero de contestaciones.
 def get_question_by_tag(tags):
-  # TODO testear más a fondo el sort, creo que esta bien, pero no estoy seguro.
   # El sort ordena los elementos segun las coincidencia con los tags.
   questions = db.preguntas.find({'tags' : {'$in' : tags }}, {'_id':1, 'titulo':1, 'idusuario':1}).sort([('tags', {'$in' : tags })])
   _questions = []
@@ -236,8 +235,6 @@ def get_questions_by_tag(n, tema):
     return json.dumps({'status': 1, 'msg': 'There is no questions with tag '+tema}, default=json_util.default)
   _questions.sort(key=lambda x: x['num_respuestas'], reverse=True)
   return json.dumps({'status':0, 'result': _questions[:n]}, indent=4, sort_keys=True, default=json_util.default)
-####Podemos ordenar el json por un atributo? esto ordena por _id
-####El problema es que tenemos que acceder a contestaciones para saber como ordenar las preguntas....
 
 ################################################################################
 ############################  FUNCIONES AUXILIARES  ############################
