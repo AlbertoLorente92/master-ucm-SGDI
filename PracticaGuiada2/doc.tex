@@ -1,0 +1,157 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{caption} 
+
+\captionsetup{skip=-30pt}
+
+\pagenumbering{gobble}
+
+
+\begin{document}
+
+\title{Sistemas de Gestión de Datos y de la Información. Práctica Guiada 2.}
+\author{Alberto Lorente y Hristo Ivanov}
+\maketitle
+
+  \begin{abstract}
+     Respuesta de las preguntas de la sesión guiada 2.
+  \end{abstract}
+
+  \section{Preguntas.}
+    \subsection{Pregunta 1. ¿Cuál es el plan ganador para la misma consulta ordenada por el nombre del usuario? db.users.find({'year':1980}).sort({'username':1})} \\ 
+     Comando ejecutado: \texttt{db.users.find({'year':1980}).sort({'username':1}).explain(true)} \\
+     Plan ganador: \texttt{SORT} \\
+    \subsection{Pregunta 2. Considerando el índice year_1, ¿cuáles son las etapas del plan ganador para la consulta de la pregunta anterior? db.users.find({'year':1980}).sort({'username':1})} \\
+     Comando ejecutado: db.users.find({'year':1980}).sort({'username':1}).explain(true) \\
+     Plan ganador: SORT \\ 
+     Etapas: SORT - KEEP_MUTATIONS - SORT_KEY_GENERATOR - FETCH - IXSCAN \\
+    \subsection{Considerando el mismo índice year_1, ¿Cuáles son las etapas del plan ganador para lasiguiente consulta? db.users.find({'like':'deportes'}).sort({'year':1}) ¿Cuántos documentos y claves se examinan? ¿Qué rango de claves se recorre?} \\
+     Comando ejecutado: db.users.find({'like':'deportes'}).sort({'year':1}).explain(true) \\
+     Plan ganador: FETCH \\
+     Etapas: FETCH - IXSCAN \\
+     Documentos examinados: 20000 \\
+     Claves examinadas: 20000 \\
+     Rango de claves recorrido: [0-20000] \\
+    \subsection{Pregunta 4. Observa la evaluación de la consulta anterior tras crear el índice year_1__id_1 y responde a las siguientes cuestiones: a) ¿Cuál es el plan ganador? ¿Qué índice usa? b) Cuántas claves y cuantos documentos consulta el plan ganador? c) ¿Cuáles son los planes rechazados? ¿Qué índices usan?} \\
+    Comando ejecutado: db.users.find({'year':1980},{'_id':1}).explain(true) \\
+    Plan ganador: PROJECTION \\
+    Índice usado: year_1__id_1 \\
+    Documentos examinados: 0 \\
+    Claves examinadas: 164 \\
+    Plan rechazado: PROJECTION \\
+    Índice usado: _id \\
+   \subsection{Pregunta 5. ¿Qué servidor se ha convertido en primario? ¿Por qué?} \\
+     
+   \item nombre
+        \item apellidos
+        \item experiencia: lista de conocimientos del usuario
+        \item fecha: fecha de ingreso en la web
+        \item direccion
+        \begin{enumerate}
+          \item pais
+          \item ciudad
+          \item cp: codigo postal
+        \end{enumerate}
+    \end{itemize}
+    \par
+    La colección \texttt{Preguntas} contendrá los siguientes atributos:   
+    \begin{itemize}  
+        \item \_id: autoasignado por la base de datos 
+        \item titulo
+        \item texto
+        \item fecha: fecha en la que se colgo la pregunta
+        \item tags: lista de etiquetas de la pregunta
+        \item idusuario: alias del usuario que cuelga la pregunta
+    \end{itemize}
+    \par
+    La colección \texttt{Contestaciones} contendrá los siguientes atributos:   
+    \begin{itemize}  
+        \item \_id: autoasignado por la base de datos 
+        \item texto
+        \item fecha: fecha en la que se colgo la pregunta
+        \item valoracion
+        \begin{enumerate}
+          \item fecha: fecha de la valoracion
+          \item nota: goor or bad
+          \item idusuario: alias del usuario que evalua la respuesta
+        \end{enumerate}
+        \item idusuario: alias del usuario que cuelga la respuesta
+        \item idpregunta: id de la pregunta que responde este documento
+        \item comentario
+        \begin{enumerate}
+          \item fecha: fecha del comentario sobre la respuesta
+          \item texto
+          \item idusuario: alias del usuario que comenta la respuesta
+        \end{enumerate}
+    \end{itemize}
+    \par
+    Tenemos 4 posibles documentos \emph{Usuarios, Preguntas, Contestaciones y Comentarios}
+    y se ha decidido anidar los comentarios dentro de las Contestaciones. 
+
+  \section{Argumentación}
+    Existen numerosas posibilidades para hacer el esquema implícito de la base de datos.
+    Sin embargo se ha elegido esta ya que es en nuestra opinión la más fácil de manejar y
+    la que mejor se adapta a todas las consultas que se van a realizar.
+    \par
+    A continuación se listan las consultas y se marcan como buenas o malas según lo adecuado
+    con el esquema implícito elegido
+    \par
+    \begin{enumerate}
+      \item Añadir un usuario. \\ \\
+      Solo añadir otro documento a la colección de usuario. \textbf{Buena}.
+      \item Actualizar un usuario. \\ \\
+      Solo modifica un documento en la colección de usuario. \textbf{Buena}.
+      \item Añadir una pregunta. \\ \\
+      Solo añadir otro documento a la colección de preguntas. \textbf{Buena}.      
+      \item Añadir una respuesta a una pregunta. \\ \\
+      Solo añadir otro documento a la colección de contestaciones. \textbf{Buena}.
+      \item Comentar una respuesta. \\ \\
+      Solo modificar un documento en la colección de contestaciones. \textbf{Buena}.
+      \item Puntuar una respuesta. \\ \\
+      Solo modificar un documento en la colección de contestaciones. \textbf{Buena}.
+      \item Modificar una puntuación de buena a mala o viceversa. \\ \\
+      Solo modificar un documento en la colección de contestaciones. \textbf{Buena}.
+      \item Borrar una pregunta junto con todas sus respuestas, comentarios y puntuaciones. \\ \\
+      Borrar un documento de la colección de preguntas y \emph{n} de contestaciones.
+      Esto supone 2 accesos a la base de datos, lo que puede provocar alguna clase de inconsistencia
+      por la ejecución al mismo tiempo de otra operación. Sin embargo facilita el manejo de
+      la base de datos. \textbf{Buena}
+      \item Visualizar una determinada pregunta junto con todas sus contestaciones
+      y comentarios. A su vez las contestaciones vendrán acompañadas de su
+      número de puntuaciones buenas y malas. \\ \\
+      El mismo caso que el apartado anterior. \textbf{Buena}.
+      \item Buscar preguntas con unos determinados tags y mostrar su título, su autor
+      y su número de contestaciones. \\ \\
+      En este caso debemos buscar todas las preguntas con ciertos tags y posteriormente
+      todas las respuestas asociadas a dichas preguntas. Esto supone 2 consultas como 
+      en el apartado anterior. \textbf{Buena}.
+      \item Ver todas las preguntas o respuestas generadas por un determinado usuario. \\ \\
+      Este es un caso semejante al anterior. \textbf{Buena}.
+      \item Ver todas las puntuaciones de un determinado usuario ordenadas por fecha.
+      Este listado debe contener el título de la pregunta original cuya respuesta
+      se puntuó. \\ \\
+      Semejante al apartado anterior se debe ahcer 2 accesos a la base de datos para 
+      encontrar las valoraciones y añadirles el título de la pregunta. \textbf{Buena}.
+      \item Ver todos los datos de un usuario.\\ \\
+      Solo se busca en la colección de usuarios. \textbf{Buena}.
+      \item Obtener los alias de los usuarios expertos en un determinado tema.\\ \\
+      Solo se busca en la colección de usuarios. \textbf{Buena}.
+      \item Visualizar las n preguntas más actuales ordenadas por fecha, incluyendo
+      el número de contestaciones recibidas.\\ \\
+      Supone 2 accesos a la base de datos. Uno primero para buscar las preguntas más actuales
+      y otro para añadir el número de contestaciones que tienen cada una. \textbf{Buena}.
+      \item Ver n preguntas sobre un determinado tema, ordenadas de mayor a menor
+      por número de contestaciones recibidas.\\ \\
+      Se accede 2 veces a la base de datos preguntando sobre un tema a la colección de
+      preguntas y sobre el número de contestaciones a la colección de contestaciones. Esto 
+      ocasiona una dificultad dado que no podemos extraer de forma ordenada por el número de
+      contestaciones recibidas en una pregunta. \textbf{Mala}
+    \end{enumerate}
+
+    
+
+
+\end{document}
