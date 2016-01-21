@@ -56,7 +56,7 @@ function mr3(){
 
 // Listado de pais-media de posts por usuario.
 function mr4(){
-	return db.sgdi.mapReduce(c5,c6,{out:"outputMR4"});
+	return db.sgdi.mapReduce(c5,c6,{out:"outputMR4",finalize:c7});
 }
 
 var c1 = function f1(){
@@ -69,26 +69,37 @@ var c1 = function f1(){
 };
 
 var c2 = function f2(key,value){
-  return key,Array.sum(value)
+  return key,Array.sum(value);
 };
 
 var c3 = function f3(){
   if(typeof this.likes == "undefined" || this.likes.length==0){
-    emit(0,1)
+    emit(0,1);
   }else{
-    emit(this.likes.length,1) 
+    emit(this.likes.length,1);
   }
 };
 
 var c4 = function f4(){
   if(this.num_posts>this.num_answers) 
-    emit(this.country,1)
+    emit(this.country,1);
 }
 
 var c5 = function f5(){
-  emit(this.country,this.num_posts)
+  var value = {count: 1, value: this.num_posts};
+  emit(this.country,value);
 };
 
 var c6 = function f6(key,value){
-  return key,Array.avg(value)
+  reducedVal = {count: 0, value: 0 };
+  for (var idx = 0; idx < value.length; idx++) {
+    reducedVal.value += value[idx].value;
+    reducedVal.count += value[idx].count;
+  }
+  return key,reducedVal;
+};
+
+var c7 = function f7(key, reducedVal){
+ avg = reducedVal.value/reducedVal.count;
+ return key,avg;
 };
