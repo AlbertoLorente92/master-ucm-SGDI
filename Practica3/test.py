@@ -252,7 +252,10 @@ def test9(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
   pass
 
 def test10(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
-  tags = get_expertises_tags()
+  while True:
+    tags = get_expertises_tags()
+    if len(tags) < 3:
+      break
   print 'Vamos a buscar estos tags:', tags
   response = get_question_by_tag(tags)
   print '     ', response

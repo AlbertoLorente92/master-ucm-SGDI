@@ -163,7 +163,7 @@ def get_question(idpregunta):
 # y su numero de contestaciones.
 def get_question_by_tag(tags):
   # El sort ordena los elementos segun las coincidencia con los tags.
-  questions = db.preguntas.find({'tags' : {'$in' : tags }}, {'_id':1, 'titulo':1, 'idusuario':1}).sort([('tags', {'$in' : tags })])
+  questions = db.preguntas.find({'tags' : {'$all' : tags }}, {'_id':1, 'titulo':1, 'idusuario':1})
   _questions = []
   for qu in questions:
     qu['number_of_answers'] = db.contestaciones.count({'idpregunta' : qu['_id']})
