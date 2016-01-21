@@ -63,7 +63,7 @@ def create_random_data():
     score = create_score()
     score ['idcontestacion'] = random.choice(list_of_response_Ids)
     score ['idusuario']  = random.choice(list_of_user_Ids)
-    response = add_answer(score['nota'],score['idusuario'],score['idcontestacion'])
+    response = score_answer(score['nota'],score['idusuario'],score['idcontestacion'])
 
 
 def provision_data():
@@ -256,27 +256,48 @@ def test10(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
     tags = get_expertises_tags()
     if len(tags) < 3:
       break
-  print 'Vamos a buscar estos tags:', tags
+  print 'Vamos a buscar respuestas con estos tags:', tags
   response = get_question_by_tag(tags)
   print '     ', response
 
 def test11(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
-  pass
+  user = random.choice(list_of_user_Ids)
+  print  'Vamos a buscar todas las preguntas y respuestas del usuario:',user
+  response = get_entries_by_user(user)
+  print '     ', response
 
 def test12(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
-  pass
+  user = random.choice(list_of_user_Ids)
+  print  'Vamos a buscar todas las puntuaciones del usuario:',user
+  response = get_scores(user)
+  print '     ', response
 
 def test13(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
-  pass
+  user = random.choice(list_of_user_Ids)
+  print  'Los datos del usuario:',user
+  response = get_user(user)
+  print '     ', response
 
 def test14(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
-  pass
+  tags = get_expertises_tags()
+  tag = tags[0]
+  print 'Vamos a buscar los usuarios expertos en el tag:', tag
+  response = get_uses_by_expertise(tag)
+  print '     ', response
 
 def test15(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
-  pass
+  n = random.randint(1,5)
+  print 'Vamos a buscar las '+`n`+' preguntas más recientes'
+  response = get_newest_questions(n)
+  print '     ', response
 
 def test16(list_of_user_Ids, list_of_question_Ids, list_of_response_Ids):
-  pass
+  n = random.randint(1,5)
+  tags = get_expertises_tags()
+  tag = tags[0]
+  print 'Vamos a buscar las '+`n`+' preguntas con mayor número de contestaciones del tag:',tag
+  response = get_questions_by_tag(n, tag)
+  print '     ', response
 
 
 def my_exit():
