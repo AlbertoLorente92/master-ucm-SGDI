@@ -73,64 +73,83 @@
     y se ha decidido anidar los comentarios dentro de las Contestaciones. 
 
   \section{Argumentación}
-    Existen numerosas posibilidades para hacer el esquema implícito de la base de datos.
-    Sin embargo se ha elegido esta ya que es en nuestra opinión la más fácil de manejar y
-    la que mejor se adapta a todas las consultas que se van a realizar.
-    \par
-    A continuación se listan las consultas y se marcan como buenas o malas según lo adecuado
-    con el esquema implícito elegido
+    A continuación vamos a analizar como se adapta el esquema propuesto a las
+    operaciones que queremos realizar. Vamos a valorar estas como
+    \emph{buenas}, \emph{normales} o \emph{malas}. Los factores que tendremos
+    en cuenta son varios. Los más importantes son consistencia de los datos,
+    simplicidad de la operación, número de accesos a la base de datos y
+    eficiencia. También es importante recalcar que no utilizaramos el
+    \texttt{aggregation framework} para la realización de estas operaciones.
     \par
     \begin{enumerate}
-      \item Añadir un usuario. \\ \\
-      Solo añadir otro documento a la colección de usuario. \textbf{Buena}.
-      \item Actualizar un usuario. \\ \\
-      Solo modifica un documento en la colección de usuario. \textbf{Buena}.
-      \item Añadir una pregunta. \\ \\
-      Solo añadir otro documento a la colección de preguntas. \textbf{Buena}.      
-      \item Añadir una respuesta a una pregunta. \\ \\
-      Solo añadir otro documento a la colección de contestaciones. \textbf{Buena}.
-      \item Comentar una respuesta. \\ \\
-      Solo modificar un documento en la colección de contestaciones. \textbf{Buena}.
-      \item Puntuar una respuesta. \\ \\
-      Solo modificar un documento en la colección de contestaciones. \textbf{Buena}.
-      \item Modificar una puntuación de buena a mala o viceversa. \\ \\
-      Solo modificar un documento en la colección de contestaciones. \textbf{Buena}.
-      \item Borrar una pregunta junto con todas sus respuestas, comentarios y puntuaciones. \\ \\
-      Borrar un documento de la colección de preguntas y \emph{n} de contestaciones.
-      Esto supone 2 accesos a la base de datos, lo que puede provocar alguna clase de inconsistencia
-      por la ejecución al mismo tiempo de otra operación. Sin embargo facilita el manejo de
-      la base de datos. \textbf{Buena}
+      \item Añadir un usuario. \\ 
+        Añadir un documento a la colección de \texttt{Usuarios}. \textbf{Buena}.
+      \item Actualizar un usuario. \\
+        Modificar un documento en la colección de \texttt{Usuarios}.. \textbf{Buena}.
+      \item Añadir una pregunta. \\
+        Una consulta a \texttt{Usuarios} para comprobar si el usuarios existe(\texttt{idusuario}).\\  
+        Añadir un documento a la colección de \texttt{Preguntas}. \textbf{Normal}.      
+      \item Añadir una respuesta a una pregunta. \\
+        Una consulta a \texttt{Usuarios} para comprobar si el usuarios existe(\texttt{idusuario}).\\  
+        Añadir un documento a la colección de \texttt{Contestaciones}. \textbf{Normal}.
+      \item Comentar una respuesta. \\
+        Una consulta a \texttt{Usuarios} para comprobar si el usuarios existe(\texttt{idusuario}).\\  
+        Modificar un documento en la colección de \texttt{Contestaciones}. \textbf{Normal}.
+      \item Puntuar una respuesta. \\
+        Una consulta a \texttt{Usuarios} para comprobar si el usuarios existe(\texttt{idusuario}).\\  
+        Modificar un documento en la colección de \texttt{Contestaciones}. \textbf{Normal}.
+      \item Modificar una puntuación de buena a mala o viceversa. \\
+        Solo modificar un documento en la colección de \texttt{Contestaciones}. \textbf{Buena}.
+      \item Borrar una pregunta junto con todas sus respuestas, comentarios y puntuaciones. \\ 
+        Borrar un documento de la colección \texttt{Preguntas}. \\
+        Borrar \emph{n} documento de la colección \texttt{Contestaciones}, que
+        se consigue en una sola querry.  \textbf{Normal}
       \item Visualizar una determinada pregunta junto con todas sus contestaciones
-      y comentarios. A su vez las contestaciones vendrán acompañadas de su
-      número de puntuaciones buenas y malas. \\ \\
-      El mismo caso que el apartado anterior. \textbf{Buena}.
+        y comentarios. A su vez las contestaciones vendrán acompañadas de su
+        número de puntuaciones buenas y malas. \\
+        Una consulta a la colección \texttt{Preguntas}. \\
+        Una consulta a la colección \texttt{Contestaciones}, en la que nos
+        traemos \emph{n} documentos.  \textbf{Normal}
       \item Buscar preguntas con unos determinados tags y mostrar su título, su autor
-      y su número de contestaciones. \\ \\
-      En este caso debemos buscar todas las preguntas con ciertos tags y posteriormente
-      todas las respuestas asociadas a dichas preguntas. Esto supone 2 consultas como 
-      en el apartado anterior. \textbf{Buena}.
-      \item Ver todas las preguntas o respuestas generadas por un determinado usuario. \\ \\
-      Este es un caso semejante al anterior. \textbf{Buena}.
+        y su número de contestaciones. \\
+        Una consulta a \texttt{Preguntas} para recuperar las preguntas. \\
+        Una consulta por cada pregunta a \texttt{Contestaciones} para recuperar
+        el número de contestaciones. \textbf{Mala}.
+      \item Ver todas las preguntas o respuestas generadas por un determinado usuario. \\
+        Dos consultas, una a \texttt{Preguntas} y la segunta a \texttt{Contestaciones}.
       \item Ver todas las puntuaciones de un determinado usuario ordenadas por fecha.
-      Este listado debe contener el título de la pregunta original cuya respuesta
-      se puntuó. \\ \\
-      Semejante al apartado anterior se debe ahcer 2 accesos a la base de datos para 
-      encontrar las valoraciones y añadirles el título de la pregunta. \textbf{Buena}.
-      \item Ver todos los datos de un usuario.\\ \\
-      Solo se busca en la colección de usuarios. \textbf{Buena}.
-      \item Obtener los alias de los usuarios expertos en un determinado tema.\\ \\
-      Solo se busca en la colección de usuarios. \textbf{Buena}.
+        Este listado debe contener el título de la pregunta original cuya respuesta
+        se puntuó. \\ 
+        Una consulta a \texttt{Contestaciones} para recuperar las puntuaciones. \\
+        Una consulta por cada puntuación para recuperar los títulos de las
+        preguntas. \textbf{Mala}.
+      \item Ver todos los datos de un usuario.\\
+        Una consulta a la colección \texttt{Usuarios}. \textbf{Buena}.
+      \item Obtener los alias de los usuarios expertos en un determinado tema.\\
+        Una consulta a la colección \texttt{Usuarios}. \textbf{Buena}.
       \item Visualizar las n preguntas más actuales ordenadas por fecha, incluyendo
-      el número de contestaciones recibidas.\\ \\
-      Supone 2 accesos a la base de datos. Uno primero para buscar las preguntas más actuales
-      y otro para añadir el número de contestaciones que tienen cada una. \textbf{Buena}.
+        el número de contestaciones recibidas.\\ 
+        Una consulta a \texttt{Preguntas} para recuperar las preguntas. \\
+        Una consulta por cada pregunta a \texttt{Contestaciones} para recuperar
+        el número de contestaciones. \textbf{Mala}.
       \item Ver n preguntas sobre un determinado tema, ordenadas de mayor a menor
-      por número de contestaciones recibidas.\\ \\
-      Se accede 2 veces a la base de datos preguntando sobre un tema a la colección de
-      preguntas y sobre el número de contestaciones a la colección de contestaciones. Esto 
-      ocasiona una dificultad dado que no podemos extraer de forma ordenada por el número de
-      contestaciones recibidas en una pregunta. \textbf{Mala}
+        por número de contestaciones recibidas.\\
+        Una consulta a \texttt{Preguntas} para recuperar las preguntas. \\
+        Una consulta por cada pregunta a \texttt{Contestaciones} para recuperar
+        el número de contestaciones. \textbf{Mala}.
     \end{enumerate}
+    Como podemos ver nuestro esquema no es perfecto. Sin embargo al tener las
+    preguntas y contestaciones en colecciones separadas este se adapta muy bien
+    a las siguientes consideraciones que debemos tener en cuenta.
+    \\ \par
+    \emph{
+      El número de contestaciones a una pregunta no está acotado.
+    }
+    \\ \par
+    \emph{
+      Deseamos que las contestaciones puedan tener contenido multimedia si es
+      necesario, por lo que su tamaño puede ser grande.
+    }
 
     
 
