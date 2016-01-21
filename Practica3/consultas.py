@@ -106,6 +106,8 @@ def score_answer(nota, idusuario, idcontestacion):
   score = form_score(nota, idusuario)
   if not score:
     return json.dumps({'status' : 1, 'msg' : 'Incomplete comment.'}, default=json_util.default)
+  if json.loads(get_user(idusuario))['status'] != 0:
+    return json.dumps({'status' : 1, 'msg' : 'Incorect Userid.'}, default=json_util.default)
   result = db.contestaciones.update_one({'_id':idcontestacion, 'valoracion.idusuario' : {'$ne' : idusuario}},\
                                         {'$addToSet' :{'valoracion':score}})
   if result.acknowledged:
@@ -303,96 +305,3 @@ def form_score(nota, idusuario):
 		"idusuario": idusuario,
   }
   return score
-################################################################################
-############################  TEST #############################################
-################################################################################
-
-"""
-#01
-print insert_user( 
-  'awesome_dude',
-  'The Dude', 
-  'Jeff The Dude Letrotski',
-  ['python', 'orm'],
-  {
-    'pais' : 'spain',
-    'cuidad' : 'madrid',
-    'cp' : '28005',
-  },
-  )
-
-
-#02
-print update_user( 
-  'awesome_dude',
-  'The Dude', 
-  'Jeff The Dude Letrotski',
-  ['python', 'orm', 'c++'],
-  {
-    'pais' : 'spain',
-    'cuidad' : 'madrid',
-    'cp' : '28005',
-  },
-  fecha = datetime.now()
-)
-
-#03
-print add_question( 
-  'Random Q',
-  ['random'],
-  'Win or lose',
-  'AlbertoLorente92'
-)
-
-#04
-print add_answer('hola', 'drmane', 1)
-  
-#05
-print add_comment(
-  'Texto',
-  'AlbertoLorente92',
-  4
-)
-
-#06
-print score_answer(
-  'good',
-  'hristoivanov',
-  4
-)
-
-#08
-print update_score(
-  'bad',
-  'hristoivanov',
-  4
-)
-
-#08
-print delete_question(1)
-
-#09
-print get_question(3)
-
-#10
-print get_question_by_tag(['json','fortran','linux'])
-
-#11
-print get_entries_by_user('linmdotor')
-
-#12
-print get_scores('drmane')
-
-#13
-print '------------------------>'
-print get_user('hristoivanov')
-
-#14
-print get_uses_by_expertise('c++')
-
-#15
-print get_newest_questions(3)
-
-#16
-print get_questions_by_tag(2, 'linux')
-"""
