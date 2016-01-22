@@ -8,7 +8,7 @@ En la entrega se encluye un fichero test.py que agiliza la carga de los fichero 
 
 También permite testear cada función del fichero consultas.py generando ids, preguntas, tags... de forma aleatoria y devolviendo los resultados.
 
-Se aconseja el usu del fichero test.py para generar y cargar los documentos.
+Se aconseja el uso del fichero test.py para generar y cargar los documentos.
 
 Los ficheros createUser.py createResponse.py createQuestion.py son usados por test.py.
 
