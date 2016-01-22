@@ -25,7 +25,7 @@ from bson.json_util import dumps
 
 
 client = MongoClient()
-db = client.pruebas
+db = client.sgdi_grupo_03
 
 # 1. Añadir un usuario
 def insert_user(_id, nombre, apellidos, experiencia, direccion):
