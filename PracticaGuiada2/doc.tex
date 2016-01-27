@@ -4,6 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
 \usepackage{caption} 
+\usepackage[T1]{fontenc}
 
 \captionsetup{skip=-30pt}
 
@@ -12,38 +13,288 @@
 
 \begin{document}
 
-\title{Sistemas de Gestión de Datos y de la Información. Práctica Guiada 2.}
+\title{Sistemas de Gestión de Datos y de la Información\\Práctica Guiada 2.}
 \author{Alberto Lorente y Hristo Ivanov}
 \maketitle
 
-  \begin{abstract}
-     Respuesta de las preguntas de la sesión guiada 2.
-  \end{abstract}
+  \newpage
+  \section{Pregunta 1.}
+    !!! TODO añadir explicación
+    \begin{lstlisting}[numbers=left,frame=single]
+"winningPlan" : {
+  "stage" : "SORT",
+  "sortPattern" : {
+    "username" : 1
+  },
+  "inputStage" : {
+    "stage" : "SORT_KEY_GENERATOR",
+    "inputStage" : {
+      "stage" : "COLLSCAN",
+      "filter" : {
+        "year" : {
+          "$eq" : 1980
+        }
+      },
+      "direction" : "forward"
+    }
+  }
+}
+    \end{lstlisting}
 
-  \section{Preguntas.}
-    \subsection{Pregunta 1. ¿Cuál es el plan ganador para la misma consulta ordenada por el nombre del usuario? db.users.find({'year':1980}).sort({'username':1})}
-     Comando ejecutado: \texttt{db.users.find({'year':1980}).sort({'username':1}).explain(true)} \\
-     Plan ganador: \texttt{SORT} \\
-    \subsection{Pregunta 2. Considerando el índice year\_1, ¿cuáles son las etapas del plan ganador para la consulta de la pregunta anterior? db.users.find({'year':1980}).sort({'username':1})} 
-     Comando ejecutado: db.users.find({'year':1980}).sort({'username':1}).explain(true) \\
-     Plan ganador: SORT \\ 
-     Etapas: SORT - KEEP\_MUTATIONS - SORT\_KEY\_GENERATOR - FETCH - IXSCAN \\
-    \subsection{Considerando el mismo índice year\_1, ¿Cuáles son las etapas del plan ganador para lasiguiente consulta? db.users.find({'like':'deportes'}).sort({'year':1}) ¿Cuántos documentos y claves se examinan? ¿Qué rango de claves se recorre?} 
-     Comando ejecutado: db.users.find({'like':'deportes'}).sort({'year':1}).explain(true) \\
-     Plan ganador: FETCH \\
-     Etapas: FETCH - IXSCAN \\
-     Documentos examinados: 20000 \\
-     Claves examinadas: 20000 \\
-     Rango de claves recorrido: [0-20000] \\
-    \subsection{Pregunta 4. Observa la evaluación de la consulta anterior tras crear el índice year\_1\_\_id\_1 y responde a las siguientes cuestiones: a) ¿Cuál es el plan ganador? ¿Qué índice usa? b) Cuántas claves y cuantos documentos consulta el plan ganador? c) ¿Cuáles son los planes rechazados? ¿Qué índices usan?} 
-    Comando ejecutado: db.users.find({'year':1980},{'\_id':1}).explain(true) \\
-    Plan ganador: PROJECTION \\
-    Índice usado: year\_1\_\_id\_1 \\
-    Documentos examinados: 0 \\
-    Claves examinadas: 164 \\
-    Plan rechazado: PROJECTION \\
-    Índice usado: \_id \\
-   \subsection{Pregunta 5. ¿Qué servidor se ha convertido en primario? ¿Por qué?} 
-   
+
+  \newpage
+  \section{Pregunta 2.}
+    !!! TODO añadir explicación
+    \begin{lstlisting}[numbers=left,frame=single]
+"winningPlan" : {
+  "stage" : "SORT",
+  "sortPattern" : {
+    "username" : 1
+  },
+  "inputStage" : {
+    "stage" : "KEEP_MUTATIONS",
+    "inputStage" : {
+      "stage" : "SORT_KEY_GENERATOR",
+      "inputStage" : {
+        "stage" : "FETCH",
+        "inputStage" : {
+          "stage" : "IXSCAN",
+          "keyPattern" : {
+            "year" : 1
+          },
+          "indexName" : "year_1",
+          "isMultiKey" : false,
+          "isUnique" : false,
+          "isSparse" : false,
+          "isPartial" : false,
+          "indexVersion" : 1,
+          "direction" : "forward",
+          "indexBounds" : {
+            "year" : [
+              "[1980.0, 1980.0]"
+            ]
+          }
+        }
+      }
+    }
+  }
+},
+    \end{lstlisting}
+
+
+  \newpage
+  \section{Pregunta 3.}
+    !!! TODO añadir explicación. Quitar las ultimas lineas y añadirlas en la explicación.
+    \begin{lstlisting}[numbers=left,frame=single]
+"winningPlan" : {
+  "stage" : "FETCH",
+  "filter" : {
+    "like" : {
+      "$eq" : "deportes"
+    }
+  },
+  "inputStage" : {
+    "stage" : "IXSCAN",
+    "keyPattern" : {
+      "year" : 1
+    },
+    "indexName" : "year_1",
+    "isMultiKey" : false,
+    "isUnique" : false,
+    "isSparse" : false,
+    "isPartial" : false,
+    "indexVersion" : 1,
+    "direction" : "forward",
+    "indexBounds" : {
+      "year" : [
+        "[MinKey, MaxKey]"
+      ]
+    }
+  }
+},
+
+"totalKeysExamined" : 20000,
+"totalDocsExamined" : 20000,
+En el IXSCAN.
+"keysExamined" : 20000,
+En el FETCH.
+"docsExamined" : 20000,
+
+    \end{lstlisting}
+
+
+  \newpage
+  \section{Pregunta 4.}
+    !!! TODO añadir explicación
+    \begin{lstlisting}[numbers=left,frame=single]
+"winningPlan" : {
+  "stage" : "PROJECTION",
+  "transformBy" : {
+    "_id" : 1
+  },
+  "inputStage" : {
+    "stage" : "IXSCAN",
+    "keyPattern" : {
+      "year" : 1,
+      "_id" : 1
+    },
+    "indexName" : "year_1__id_1",
+    "isMultiKey" : false,
+    "isUnique" : false,
+    "isSparse" : false,
+    "isPartial" : false,
+    "indexVersion" : 1,
+    "direction" : "forward",
+    "indexBounds" : {
+      "year" : [
+        "[1980.0, 1980.0]"
+      ],
+      "_id" : [
+        "[MinKey, MaxKey]"
+      ]
+    }
+  }
+},
+
+"totalKeysExamined" : 164,
+"totalDocsExamined" : 0,
+
+"rejectedPlans" : [
+  {
+    "stage" : "PROJECTION",
+    "transformBy" : {
+      "_id" : 1
+    },
+    "inputStage" : {
+      "stage" : "FETCH",
+      "inputStage" : {
+        "stage" : "IXSCAN",
+        "keyPattern" : {
+          "year" : 1
+        },
+        "indexName" : "year_1",
+        "isMultiKey" : false,
+        "isUnique" : false,
+        "isSparse" : false,
+        "isPartial" : false,
+        "indexVersion" : 1,
+        "direction" : "forward",
+        "indexBounds" : {
+          "year" : [
+            "[1980.0, 1980.0]"
+          ]
+        }
+      }
+    }
+  }
+]
+},
+    \end{lstlisting}
+
+  \section{Pregunta 5.}
+    El servidor primario es el 27102. Al ser este el primero en formar parte
+    del \emph{Replica Set}. Los demás al ser añadidos después, han tomado a
+    este como primario.
+
+  \section{Pregunta 6.}
+    Sí. Al perder conexión con el servidor primario estos han realizado una
+    votación para elegir el nuevo servidor primario. En este caso el nuevo
+    servidor primario ha sido el 27101. El \texttt{uptime} tiene gran peso en
+    la toma de esta decisión, pero también se toman otros factores en
+    consideración.
+
+  \section{Pregunta 7.}
+    En nuestro caso el 27103 sigue vivo, en estado de segundario. El servidor
+    27103 sigue como segundario porque no sabe si el servidor primario sigue
+    vivo o simplemente no esta alcanzable. En cambio en la configuración
+    anterior teniamos dos servidores segundarios que no eran capaces de
+    alcanzar el primario. 
+
+  \section{Pregunta 8.}
+    En el primero.
+
+  \section{Pregunta 9.}
+  Chunks total : 14.
+  \begin{itemize}
+    \item Chunks 27101 : 5
+    \item Chunks 27102 : 5
+    \item Chunks 27103 : 4
+  \end{itemize}
+  Los rangos pueden apreciar se en la siguiente lista:
+  \begin{lstlisting}[numbers=left, basicstyle=\tiny]
+{ "username" : { "$minKey" : 1 } } -->> { "username" : "DnGYx" } on : shard0001 Timestamp(2, 0) 
+{ "username" : "DnGYx" } -->> { "username" : "HZGYA" } on : shard0002 Timestamp(3, 0) 
+{ "username" : "HZGYA" } -->> { "username" : "LMwRR" } on : shard0001 Timestamp(4, 0) 
+{ "username" : "LMwRR" } -->> { "username" : "PEeab" } on : shard0002 Timestamp(5, 0) 
+{ "username" : "PEeab" } -->> { "username" : "Srtfj" } on : shard0001 Timestamp(6, 0) 
+{ "username" : "Srtfj" } -->> { "username" : "WdqWk" } on : shard0002 Timestamp(7, 0) 
+{ "username" : "WdqWk" } -->> { "username" : "aSneZ" } on : shard0001 Timestamp(8, 0) 
+{ "username" : "aSneZ" } -->> { "username" : "eHexD" } on : shard0002 Timestamp(9, 0) 
+{ "username" : "eHexD" } -->> { "username" : "hxwlf" } on : shard0001 Timestamp(10, 0) 
+{ "username" : "hxwlf" } -->> { "username" : "lnVtN" } on : shard0000 Timestamp(10, 1) 
+{ "username" : "lnVtN" } -->> { "username" : "peFcR" } on : shard0000 Timestamp(1, 10) 
+{ "username" : "peFcR" } -->> { "username" : "tVaHf" } on : shard0000 Timestamp(1, 11) 
+{ "username" : "tVaHf" } -->> { "username" : "xLoBa" } on : shard0000 Timestamp(1, 12) 
+{ "username" : "xLoBa" } -->> { "username" : { "$maxKey" : 1 } } on : shard0000 Timestamp(1, 13) 
+  \end{lstlisting}
+
+
+  \newpage
+  \section{Pregunta 10.}
+    \begin{itemize}
+      \item \texttt{e.find({'\_id':67})}
+        \begin{itemize}
+          \item Número de shards: X
+          \item Resultados devueltos por shard:
+            \begin{itemize}
+              \item Shard 27101 : X
+              \item Shard 27102 : X
+              \item Shard 27103 : X
+            \end{itemize}
+          \item Tipo de busqueda por shard:
+            \begin{itemize}
+              \item Shard 27101 : X
+              \item Shard 27102 : X
+              \item Shard 27103 : X
+            \end{itemize}
+          \item Número total de documentos examinados : X
+        \end{itemize}
+      \item \texttt{e.find({'year':1997})}
+        \begin{itemize}
+          \item Número de shards: X
+          \item Resultados devueltos por shard:
+            \begin{itemize}
+              \item Shard 27101 : X
+              \item Shard 27102 : X
+              \item Shard 27103 : X
+            \end{itemize}
+          \item Tipo de busqueda por shard:
+            \begin{itemize}
+              \item Shard 27101 : X
+              \item Shard 27102 : X
+              \item Shard 27103 : X
+            \end{itemize}
+          \item Número total de documentos examinados : X
+        \end{itemize}
+      \item \texttt{e.find({'username':'Aaron'})}
+        \begin{itemize}
+          \item Número de shards: X
+          \item Resultados devueltos por shard:
+            \begin{itemize}
+              \item Shard 27101 : X
+              \item Shard 27102 : X
+              \item Shard 27103 : X
+            \end{itemize}
+          \item Tipo de busqueda por shard:
+            \begin{itemize}
+              \item Shard 27101 : X
+              \item Shard 27102 : X
+              \item Shard 27103 : X
+            \end{itemize}
+          \item Número total de documentos examinados : X
+        \end{itemize}
+    \end{itemize}
+
+
+
 \end{document}
-
