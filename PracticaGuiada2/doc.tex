@@ -129,12 +129,8 @@
   }
 },
 
-"totalKeysExamined" : 20000,  BORRAR
+"totalKeysExamined" : 20000, 
 "totalDocsExamined" : 20000,
-En el IXSCAN.
-"keysExamined" : 20000,
-En el FETCH.
-"docsExamined" : 20000,
 
     \end{lstlisting}
 
@@ -148,7 +144,6 @@ En el FETCH.
    a) El plan ganador es IXSCAN - PROJECTION. El índice year\_1\_\_id\_1\\
    b) El plan ganador examina 164 claves y 0 documentos. \\
    c) El plan rechazado es IXSCAN - FETCH - PROJECTION. Supone la proyección del plan de la pregunta anterior. 
-    !!! TODO añadir explicación
     \begin{lstlisting}[numbers=left,frame=single]
 "winningPlan" : {
   "stage" : "PROJECTION",
@@ -326,14 +321,14 @@ Consulta 3: Usuario de nombre "Aaron"\\}
           \item Número de shards: 1
           \item Resultados devueltos por shard:
             \begin{itemize}
-              \item Shard 27101 : 0
-              \item Shard 27102 : X
+              \item Shard 27101 : X
+              \item Shard 27102 : 0
               \item Shard 27103 : X
             \end{itemize}
           \item Tipo de busqueda por shard:
             \begin{itemize}
-              \item Shard 27101 : IXSCAN - SHARDING\_FILTER - FETCH
-              \item Shard 27102 : X
+              \item Shard 27101 : X
+              \item Shard 27102 : IXSCAN - SHARDING\_FILTER - FETCH
               \item Shard 27103 : X
             \end{itemize}
           \item Número total de documentos examinados : 0
